@@ -287,8 +287,8 @@ class FrenteCaixa extends React.Component {
     buscarProdutos = (value) => {
         return new Promise((resolve, reject) => {
             this.setState({ buscaProduto: value, carregando: false, produtoNaoLocalizado: false });
+
             fetch(`https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produtos`)
-                // fetch("http://localhost:8081/api/v1/produtos")
                 .then((resposta) => {
                     if (!resposta.ok) {
                         throw new Error('Erro na chamada da API');
@@ -365,9 +365,8 @@ class FrenteCaixa extends React.Component {
 
     buscarContato = (value) => {
         const sanitizedValue = this.sanitizeString(value).toLowerCase();
-
         this.setState({ buscaContato: value, carregando: true, contatoNaoLocalizado: false });
-        // fetch(`http://localhost:8080/api/v1/contatos`)
+
         fetch(`https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/contatos`)
             .then((resposta) => {
                 if (!resposta.ok) {
@@ -458,7 +457,7 @@ class FrenteCaixa extends React.Component {
     buscarVendedor = (value) => {
         return new Promise((resolve, reject) => {
             this.setState({ buscaVendedor: value, carregando: true, vendedorNaoLocalizado: false });
-            // fetch(`http://localhost:8080/api/v1/contatos`)
+
             fetch(`https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/contatos`)
                 .then((resposta) => {
                     if (!resposta.ok) {
@@ -561,7 +560,7 @@ class FrenteCaixa extends React.Component {
     buscarPedido = (value) => {
         return new Promise((resolve, reject) => {
             this.setState({ buscaPedido: value, carregando: true });
-            // fetch("http://localhost:8080/api/v1/pedidos")
+
             fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/pedidos")
                 .then((resposta) => {
                     if (!resposta.ok) {
@@ -604,7 +603,7 @@ class FrenteCaixa extends React.Component {
 
     buscarFormaDePagamento = () => {
         return new Promise((resolve, reject) => {
-            // fetch("http://localhost:8080/api/v1/formaspagamento")
+
             fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/formaspagamento")
 
                 .then((resposta) => {
@@ -644,7 +643,7 @@ class FrenteCaixa extends React.Component {
 
     buscarLoja = () => {
         return new Promise((resolve, reject) => {
-            // fetch("http://localhost:8080/api/v1/selecionarLojas")
+
             fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/selecionarLojas")
                 .then((resposta) => {
                     if (!resposta.ok) {
@@ -694,7 +693,6 @@ class FrenteCaixa extends React.Component {
         const xml = parser.parseFromString(xmlPedido, 'text/xml');
         const stringXml = new XMLSerializer().serializeToString(xml);
 
-        // fetch('http://localhost:8080/api/v1/cadastrarpedido', {
         fetch('https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/cadastrarpedido', {
 
             method: 'POST',
