@@ -12,7 +12,6 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 
 import { BrowserRouter, Routes, Link, Route } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -58,8 +57,8 @@ class App extends Component {
 
                       <NavDropdown title="Cadastros" id="nav-dropdown-dark-example" menuVariant="dark">
                         <NavDropdown.Item as={Link} to="/Contato">Clientes e Fornecedores</NavDropdown.Item>
-                        <NavDropdown.Item as={Link} to="/Loja" >Lojas</NavDropdown.Item>
                         <NavDropdown.Item as={Link} to="/Produto">Produtos</NavDropdown.Item>
+                        <NavDropdown.Item as={Link} to="/Loja" >Unidade Loja</NavDropdown.Item>
                       </NavDropdown>
 
                       <NavDropdown title="Vendas" id="nav-dropdown-dark-example" menuVariant="dark">
@@ -68,7 +67,9 @@ class App extends Component {
                     </Nav>
 
                     {this.state.isLoggedIn && (  // Renderizar botão de deslogar apenas quando logado
-                      <Button variant="danger" onClick={this.handleLogout} className="btn btn-link text-light ms-auto">Deslogar</Button>
+                      <Button variant="danger" onClick={this.handleLogout} className="btn btn-link text-light ms-auto">
+                        <img alt="" src="/assets/sair.png" width="30" height="30" className="d-inline-block align-top" />
+                      </Button>
                     )}
 
                   </Navbar.Collapse>
