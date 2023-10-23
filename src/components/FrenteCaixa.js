@@ -1,7 +1,6 @@
 import React from "react";
 
 import '../css/FrenteCaixa.css';
-import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -49,30 +48,6 @@ class FrenteCaixa extends React.Component {
         super(props);
 
         this.state = {
-            buscaProduto: '',
-            buscaContato: '',
-            buscaVendedor: '',
-            vendedor: '',
-            nome: '',
-            consumidorFinal: '',
-            cnpj: '',
-            ie: '',
-            rg: '',
-            tipo: '',
-            contribuinte: 9,
-            cep: '',
-            endereco: '',
-            numero: '',
-            complemento: '',
-            bairro: '',
-            cidade: '',
-            uf: '',
-            email: '',
-            fone: '',
-            celular: '',
-            observacoes: '',
-            observacaointerna: '',
-            comentario: '',
             produtos: [],
             contatos: [],
             depositos: [],
@@ -85,12 +60,8 @@ class FrenteCaixa extends React.Component {
             vendedoresSelecionados: [],
             vendedoresFiltrados: [],
             itensSelecionados: [],
-            produtoSelecionado: '',
-            contatoSelecionado: '',
-            vendedorSelecionado: '',
-            carregandoProduto: '',
-            carregandoContato: '',
-            carregandoVendedor: '',
+            forma: [],
+            parcelas: [{ dias: 0 }],
             preco: 0,
             precoProdutoSelecionado: 0,
             quantidade: 1,
@@ -104,9 +75,61 @@ class FrenteCaixa extends React.Component {
             dinheiroRecebido: 0,
             troco: 0,
             dinheiro: 0,
+            contribuinte: 9,
+            subtotalComFrete: 0,
+            frete: 0,
+            condicao: 0,
+            subtotalGeral: 0,
+            numLinhas: 0,
+            newParcelas: 0,
+            numeroPedido: 0,
+            ultimoPedido: 0,
+            prazo: 0,
+            descontoProduto: 0,
+            descontoTotal: 0,
+            buscaProduto: '',
+            buscaContato: '',
+            buscaVendedor: '',
+            vendedor: '',
+            nome: '',
+            consumidorFinal: '',
+            cnpj: '',
+            ie: '',
+            rg: '',
+            tipo: '',
+            cep: '',
+            endereco: '',
+            numero: '',
+            complemento: '',
+            bairro: '',
+            cidade: '',
+            uf: '',
+            email: '',
+            fone: '',
+            celular: '',
+            observacoes: '',
+            observacaointerna: '',
+            comentario: '',
+            produtoSelecionado: '',
+            contatoSelecionado: '',
+            vendedorSelecionado: '',
+            carregandoProduto: '',
+            carregandoContato: '',
+            carregandoVendedor: '',
             dataPrevista: '',
             dataPrevistaFormatted: '',
+            data: '',
+            valor: '',
+            observacao: '',
+            imagem: '',
+            nomeLoja: '',
+            idLoja: '',
+            unidadeLoja: '',
+            unidade: '',
+            un: '',
+            vlr_desconto: '',
             depositoSelecionado: null,
+            erro: null,
             ModalFinalizarVendaSemItem: false,
             ModalExcluirPedido: false,
             modalInserirProduto: false,
@@ -119,40 +142,19 @@ class FrenteCaixa extends React.Component {
             ModalFormaPagamento: false,
             ModalExcluirProduto: false,
             ModalCpfValido: false,
-            subtotalComFrete: 0,
-            frete: 0,
             freteInserido: false,
-            parcelas: [{ dias: 0 }],
-            condicao: 0,
-            forma: [],
-            subtotalGeral: 0,
             carregando: false,
-            numLinhas: 0,
-            newParcelas: 0,
-            numeroPedido: 0,
-            ultimoPedido: 0,
-            data: '',
-            valor: '',
-            observacao: '',
-            prazo: 0,
             carregado: false,
-            erro: null,
-            imagem: '',
-            descontoProduto: 0,
-            descontoTotal: 0,
-            opcaoDescontoItem: 'desliga',
-            opcaoDescontoLista: 'desliga',
             validated: false,
             produtoNaoLocalizado: false,
             contatoNaoLocalizado: false,
             vendedorNaoLocalizado: false,
             primeiroProdutoDesconto: false,
-            nomeLoja: '',
-            idLoja: '',
-            unidadeLoja: '',
             isChecked: false,
             cpfValido: false,
-            cnpjValido: false
+            cnpjValido: false,
+            opcaoDescontoItem: 'desliga',
+            opcaoDescontoLista: 'desliga',
         };
 
         this.atualizaDesconto = this.atualizaDesconto.bind(this);
@@ -250,7 +252,7 @@ class FrenteCaixa extends React.Component {
         //     .catch((error) => {
         //         this.setState({ erro: error.message });
         //     });
-        this.ModalSelecionarLoja()
+        this.ModalSelecionarLoja();
 
         this.setState({ carregado: true }); //APAGAR (GAMBIARRA)
     };
@@ -279,14 +281,17 @@ class FrenteCaixa extends React.Component {
         };
     };
 
-    //----------------------------------------- CHAMADAS DE API´S ----------------------------------------------------------
-    //----------------------------------------- API BUSCA PRODUTOS ----------------------------------------------------------
+    /**
+     *  -------------------- CHAMADAS E CONSUMO DAS API´s QUE COMPÕE O PDV. -------------------- 
+     */
 
     buscarProdutos = (value) => {
         return new Promise((resolve, reject) => {
             this.setState({ buscaProduto: value, carregando: false, produtoNaoLocalizado: false });
 
-            fetch(`https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produtos`)
+            // fetch(`https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produtos`)
+            fetch(`http://localhost:8081/api/v1/produtos`)
+
                 .then((resposta) => {
                     if (!resposta.ok) {
                         throw new Error('Erro na chamada da API');
@@ -294,6 +299,7 @@ class FrenteCaixa extends React.Component {
                     return resposta.json();
                 })
                 .then((dados) => {
+                    console.log("Produto: ", dados)
                     if (dados.retorno.produtos) {
                         const palavrasBusca = value.toLowerCase().split(' ');
 
@@ -365,7 +371,9 @@ class FrenteCaixa extends React.Component {
         const sanitizedValue = this.sanitizeString(value).toLowerCase();
         this.setState({ buscaContato: value, carregando: true, contatoNaoLocalizado: false });
 
-        fetch(`https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/contatos`)
+        // fetch(`https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/contatos`)
+        fetch(`http://localhost:8080/api/v1/contatos`)
+
             .then((resposta) => {
                 if (!resposta.ok) {
                     throw new Error('Erro na chamada da API');
@@ -456,7 +464,9 @@ class FrenteCaixa extends React.Component {
         return new Promise((resolve, reject) => {
             this.setState({ buscaVendedor: value, carregando: true, vendedorNaoLocalizado: false });
 
-            fetch(`https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/contatos`)
+            // fetch(`https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/contatos`)
+            fetch(`http://localhost:8080/api/v1/contatos`)
+
                 .then((resposta) => {
                     if (!resposta.ok) {
                         throw new Error("Erro na chamada da API");
@@ -476,7 +486,8 @@ class FrenteCaixa extends React.Component {
                                 (contato?.contato?.nome?.toLowerCase().includes(value.toLowerCase()) ||
                                     contato?.contato?.codigo?.toLowerCase().includes(value.toLowerCase()))
                         );
-
+                        console.log("dados: ", dados);
+                        console.log("vendedor: ", vendedoresFiltrados);
                         if (vendedoresFiltrados.length === 0) {
                             // Nenhum vendedor encontrado
                             this.setState({
@@ -559,7 +570,9 @@ class FrenteCaixa extends React.Component {
         return new Promise((resolve, reject) => {
             this.setState({ buscaPedido: value, carregando: true });
 
-            fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/pedidos")
+            // fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/pedidos")
+            fetch(`http://localhost:8080/api/v1/pedidos`)
+
                 .then((resposta) => {
                     if (!resposta.ok) {
                         throw new Error("Erro na chamada da API");
@@ -595,14 +608,15 @@ class FrenteCaixa extends React.Component {
                     reject(error); // Rejeite a Promise se ocorrer um erro na chamada da API
                 });
         });
-    }; ''
+    };
 
     //----------------------------------------- API BUSCA FORMA DE PAGAMENTO ----------------------------------------------------------
 
     buscarFormaDePagamento = () => {
         return new Promise((resolve, reject) => {
 
-            fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/formaspagamento")
+            // fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/formaspagamento")
+            fetch(`http://localhost:8080/api/v1/formaspagamento`)
 
                 .then((resposta) => {
                     if (!resposta.ok) {
@@ -642,7 +656,9 @@ class FrenteCaixa extends React.Component {
     buscarLoja = () => {
         return new Promise((resolve, reject) => {
 
-            fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/selecionarLojas")
+            // fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/selecionarLojas")
+            fetch(`http://localhost:8080/api/v1/selecionarLojas`)
+
                 .then((resposta) => {
                     if (!resposta.ok) {
                         throw new Error("Erro na chamada da API");
@@ -691,7 +707,8 @@ class FrenteCaixa extends React.Component {
         const xml = parser.parseFromString(xmlPedido, 'text/xml');
         const stringXml = new XMLSerializer().serializeToString(xml);
 
-        fetch('https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/cadastrarpedido', {
+        // fetch('https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/cadastrarpedido', {
+        fetch('http://localhost:8080/api/v1/cadastrarpedido', {
 
             method: 'POST',
             body: stringXml,
@@ -703,22 +720,6 @@ class FrenteCaixa extends React.Component {
         this.buscarPedido();
 
     };
-
-    //----------------------------------------- API CADASTRAR FORMA DE PAGAMENTO ----------------------------------------------------------
-
-    // cadastrarFormaDePagamento = (xmlFormaPagamento) => {
-    //     const parser = new DOMParser();
-    //     const xml = parser.parseFromString(xmlFormaPagamento, 'text/xml');
-    //     const stringXml = new XMLSerializer().serializeToString(xml);
-
-    //     fetch('http://localhost:8086/api/v1/cadastrarformapagamento', {
-    //         method: 'POST',
-    //         body: stringXml,
-    //         headers: {
-    //             'Content-Type': 'application/xml'
-    //         }
-    //     });
-    // };
 
     //----------------------------------------- API´s PUBLICAS (CEP) ----------------------------------------------------------
 
@@ -739,15 +740,18 @@ class FrenteCaixa extends React.Component {
                 this.atualizaCidade({ target: { value: localidade } });
                 this.atualizaUf({ target: { value: uf } });
                 this.atualizaEndereco({ target: { value: logradouro } });
-                this.atualizaBairro({ target: { value: bairro } })
-
+                this.atualizaBairro({ target: { value: bairro } });
                 // console.log("CHECKCEP", data);
             });
     };
 
-    //----------------------------------------- FUNÇÕES DE AÇÕES (EVENTOS) TELA ---------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    //----------------------------------------- FUNÇÕES DE AÇÕES (EVENTOS) TELA ---------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
-    //----------------------------------------- FUNÇÕES VENDEDOR --------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    //------------------------------------------------- FUNÇÕES VENDEDOR ----------------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     atualizaBuscaVendedor = (event) => {
         // console.log("vendedor selecionado:", vendedorSelecionado);
@@ -764,7 +768,9 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-    // -------------------------------------------- FUNÇÕES / CADASTRO DE CONTATO ---------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ------------------------------------------- FUNÇÕES / CADASTRO DE CONTATO --------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     atualizarBuscaContato = (event) => {
         const buscaContato = event.target.value;
@@ -846,7 +852,7 @@ class FrenteCaixa extends React.Component {
                     cnpjValido: false // Define a flag de CNPJ válido como false
                 });
                 return; // Retorna antecipadamente para evitar ações adicionais
-            }
+            };
 
             const cpfFormatado = cpfCnpjSemPontuacao.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
             this.setState({
@@ -864,7 +870,7 @@ class FrenteCaixa extends React.Component {
                     cnpjValido: false // Define a flag de CNPJ válido como false
                 });
                 return; // Retorna antecipadamente para evitar ações adicionais
-            }
+            };
 
             const cnpjFormatado = cpfCnpjSemPontuacao.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
             this.setState({
@@ -880,7 +886,7 @@ class FrenteCaixa extends React.Component {
                 cpfValido: false,
                 cnpjValido: false
             });
-        }
+        };
     };
 
     validarCPF(cpf) {
@@ -888,43 +894,43 @@ class FrenteCaixa extends React.Component {
 
         if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) {
             return false; // CPF inválido se não tiver 11 dígitos ou se todos os dígitos forem iguais
-        }
+        };
 
         let soma = 0;
         let resto;
 
         for (let i = 1; i <= 9; i++) {
             soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
-        }
+        };
 
         resto = (soma * 10) % 11;
 
         if (resto === 10 || resto === 11) {
             resto = 0;
-        }
+        };
 
         if (resto !== parseInt(cpf.substring(9, 10))) {
             return false; // CPF inválido se o dígito verificador não bater
-        }
+        };
 
         soma = 0;
 
         for (let i = 1; i <= 10; i++) {
             soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
-        }
+        };
 
         resto = (soma * 10) % 11;
 
         if (resto === 10 || resto === 11) {
             resto = 0;
-        }
+        };
 
         if (resto !== parseInt(cpf.substring(10, 11))) {
             return false; // CPF inválido se o dígito verificador não bater
-        }
+        };
 
         return true; // CPF válido
-    }
+    };
 
     validarCNPJ(cnpj) {
 
@@ -936,7 +942,7 @@ class FrenteCaixa extends React.Component {
 
         if (cnpj.length !== 14) {
             return false; // CNPJ inválido se não tiver 14 dígitos
-        }
+        };
 
         let tamanho = cnpj.length - 2;
         let numeros = cnpj.substring(0, tamanho);
@@ -948,14 +954,14 @@ class FrenteCaixa extends React.Component {
             soma += parseInt(numeros.charAt(tamanho - i), 10) * pos--;
             if (pos < 2) {
                 pos = 9;
-            }
-        }
+            };
+        };
 
         let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
 
         if (resultado !== parseInt(digitos.charAt(0), 10)) {
             return false; // CNPJ inválido se o primeiro dígito verificador não bater
-        }
+        };
 
         tamanho += 1;
         numeros = cnpj.substring(0, tamanho);
@@ -966,18 +972,17 @@ class FrenteCaixa extends React.Component {
             soma += parseInt(numeros.charAt(tamanho - i), 10) * pos--;
             if (pos < 2) {
                 pos = 9;
-            }
-        }
+            };
+        };
 
         resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
 
         if (resultado !== parseInt(digitos.charAt(1), 10)) {
             return false; // CNPJ inválido se o segundo dígito verificador não bater
-        }
+        };
 
         return true; // CNPJ válido
-    }
-
+    };
 
     atualizaRg = (event) => {
         const rg = event.target.value;
@@ -1004,7 +1009,7 @@ class FrenteCaixa extends React.Component {
                 ie_rg: "ISENTO",
                 ie: "ISENTO"
             });
-        }
+        };
     };
 
     atualizaContribuinte = (event) => {
@@ -1112,7 +1117,9 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-    // -------------------------------------------- FUNÇÕES PRODUTO / LISTA DE PRODUTO ---------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ------------------------------------- FUNÇÕES PRODUTO / LISTA DE PRODUTO ---------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     atualizarBuscaProduto = (event) => {
         this.setState({
@@ -1144,7 +1151,7 @@ class FrenteCaixa extends React.Component {
         if (!produtoSelecionado) {
             this.modalInserirProduto();
             return;
-        }
+        };
 
         const produtoExistenteIndex = produtosSelecionados.findIndex(
             (produto) => produto.produto.id === produtoSelecionado.produto.id
@@ -1214,9 +1221,8 @@ class FrenteCaixa extends React.Component {
                     this.calcularTotal();
                 }
             );
-        }
+        };
     };
-
 
     excluirProdutoSelecionado = (index) => {
         const produtosSelecionados = [...this.state.produtosSelecionados];
@@ -1234,7 +1240,9 @@ class FrenteCaixa extends React.Component {
         this.modalExcluirProduto();
     };
 
-    // -------------------------------------------- FUNÇÕES CALCULOS ---------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ------------------------------------------------- FUNÇÕES CALCULOS ---------------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     calcularTotal() {
         let total = 0;
@@ -1276,8 +1284,9 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-
-    // -------------------------------------------- FUNÇÕES CAMPO PREÇO (%) --------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ---------------------------------------------- FUNÇÕES CAMPO PREÇO (%) -----------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     atualizaDescontoProduto = (event) => {
         const descontoInicialProduto = event.target.value;
@@ -1294,7 +1303,7 @@ class FrenteCaixa extends React.Component {
             this.setState({
                 preco: precoOriginal
             });
-        }
+        };
     };
 
     atualizarValorTotal = () => {
@@ -1308,7 +1317,7 @@ class FrenteCaixa extends React.Component {
             const descontoDecimal = descontoPorcentagem / 100;
             descontoTotal = novoPrecoDesconto * descontoDecimal;
             novoPrecoDesconto -= descontoTotal;
-        }
+        };
 
         // console.log(descontoInicialProduto)
 
@@ -1323,7 +1332,9 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-    // -------------------------------------------- FUNÇÕES CAMPO DESCONTO (TOTAL) --------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // -------------------------------------------- FUNÇÕES CAMPO DESCONTO (TOTAL) ------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     calcularTotalComDesconto = (desconto, subTotal) => {
         const subtotal = subTotal || this.calcularTotal();
@@ -1338,7 +1349,7 @@ class FrenteCaixa extends React.Component {
 
         if (isNaN(totalComDesconto)) {
             // console.log("Total com desconto é NaN!");
-        }
+        };
 
         return {
             valorDesconto: formattedValorDesconto,
@@ -1369,8 +1380,9 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-
-    // -------------------------------------------- FUNÇÕES CAMPOS TOTAL EM DINHEIRO E TROCO --------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ---------------------------------- FUNÇÕES CAMPOS TOTAL EM DINHEIRO E TROCO ------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     calcularTotalComDinheiro = (dinheiro) => {
         const totalRecebidoEmDinheiro = parseFloat(dinheiro) || 0;
@@ -1404,7 +1416,7 @@ class FrenteCaixa extends React.Component {
                 troco: 0,
             });
             return;
-        }
+        };
 
         if (!isNaN(parseFloat(valorRecebido)) && parseFloat(valorRecebido) >= 0) {
             const { totalComDesconto } = this.state;
@@ -1414,11 +1426,12 @@ class FrenteCaixa extends React.Component {
                 dinheiroRecebido,
                 troco: troco,
             });
-        }
+        };
     };
 
-
-    // -------------------------------------------- FUNÇÕES CAMPO FRETE --------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ------------------------------------------------ FUNÇÕES CAMPO FRETE -------------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     atualizaTotalComFrete(event) {
         const valor = event.target.value.replace(',', '.');
@@ -1454,7 +1467,10 @@ class FrenteCaixa extends React.Component {
         return parseFloat(subTotalGeral);
     };
 
-    // -------------------------------------------- FUNÇÕES TELA SELEÇÃO DE LOJA E UNIDADE --------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // -------------------------------------- FUNÇÕES TELA SELEÇÃO DE LOJA E UNIDADE ----------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
+
     atualizaNomeLoja = (event) => {
         const idLoja = event.target.value;
         console.log("idLoja: ", idLoja);
@@ -1498,7 +1514,9 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-    // -------------------------------------------- FUNÇÕES BOTÕES ---------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // -------------------------------------------------- FUNÇÕES BOTÕES ----------------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     excluirPedido = () => {
         this.setState({
@@ -1621,8 +1639,8 @@ class FrenteCaixa extends React.Component {
                 this.finalizaVenda();
             } else {
                 this.ModalCpfValido();
-            }
-        }
+            };
+        };
     };
 
     finalizaVenda = () => {
@@ -1637,6 +1655,7 @@ class FrenteCaixa extends React.Component {
         const observacoes = this.state.observacoes;
         const observacaointerna = this.state.observacaointerna;
         const valorDesconto = this.state.desconto;
+        const unidade = this.state.unidade;
         const itens = [];
         const prazo = [];
 
@@ -1648,7 +1667,7 @@ class FrenteCaixa extends React.Component {
 
             if (produto.descontoInicialProduto > 0 && produto.descontoItem > 0) {
                 produto.descontoInicialProduto = 0;
-            }
+            };
 
             if (produto.descontoInicialProduto === 0 && produto.descontoItem >= 0) {
                 vlr_unit = produto.produto.preco;
@@ -1662,7 +1681,7 @@ class FrenteCaixa extends React.Component {
                 vlr_unit = produto.produto.preco;
             } else {
                 vlr_unit = produto.preco;
-            }
+            };
 
             descontoItemLista = produto.descontoInicialProduto || produto.descontoItem;
 
@@ -1670,6 +1689,7 @@ class FrenteCaixa extends React.Component {
                 codigo: produto.produto.codigo,
                 descricao: produto.produto.descricao,
                 qtde: produto.quantidade,
+                un: unidade,
                 vlr_unit,
                 descontoItemLista
             };
@@ -1680,6 +1700,7 @@ class FrenteCaixa extends React.Component {
 
         this.state.parcelas.forEach((parcela) => {
             const parcelas = {
+                dias: parcela.dias,
                 data: parcela.data,
                 valor: parcela.valor,
                 observacao: parcela.observacao,
@@ -1708,58 +1729,65 @@ class FrenteCaixa extends React.Component {
     gerarXmlItensParaEnvio = () => {
         const { itens, prazo, dataPrevistaFormatted = '' } = this.finalizaVenda();
 
-        const xml = `<?xml version="1.0"?>
-          <pedido>
-          <vlr_desconto>${this.state.valorDesconto}</vlr_desconto>
-            <data_prevista>${dataPrevistaFormatted}</data_prevista>
-            <obs>${this.state.observacoes}</obs>
-            <obs_internas>${this.state.observacaointerna}</obs_internas>
-            <vendedor>${this.state.vendedor}</vendedor>
-            <vlr_frete>${this.state.frete}</vlr_frete>
-            <loja>${this.state.idLoja}</loja>
-            <cliente>
-                <nome>${this.state.nome}</nome>
-                <cpf_cnpj>${this.state.cnpj}</cpf_cnpj>
-                <tipoPessoa>${this.state.tipo}</tipoPessoa>
-                <ie>${this.state.ie}</ie>
-                <rg>${this.state.rg}</rg>
-                <contribuinte>${this.state.contribuinte}</contribuinte>
-                <endereco>${this.state.endereco}</endereco>
-                <numero>${this.state.numero}</numero>
-                <complemento>${this.state.complemento}</complemento>
-                <bairro>${this.state.bairro}</bairro>
-                <cep>${this.state.cep}</cep>
-                <cidade>${this.state.cidade}</cidade>
-                <uf>${this.state.uf}</uf>
-                <fone>${this.state.fone}</fone>
-                <celular>${this.state.celular}</celular>
-                <email>${this.state.email}</email>
-                <dataNascimento>${this.state.dataNascimento}</dataNascimento>
-            </cliente>
-            <itens>
-              ${itens.map((item) => `
-                <item>
-                  <codigo>${item.codigo}</codigo>
-                  <descricao>${item.descricao}</descricao>
-                  <qtde>${item.qtde}</qtde>
-                  <vlr_unit>${item.vlr_unit}</vlr_unit>
-                  <vlr_desconto>${item.descontoItemLista}</vlr_desconto>
-                </item>`).join('')}
-            </itens>
-            <parcelas>
-            ${prazo.map((parcelas) => `
-                <parcela>
-                    <data>${parcelas.data}</data>
-                    <vlr>${parcelas.valor}</vlr>
-                    <obs>${parcelas.observacao}</obs>
-                    <forma_pagamento>
-                        <id>${parcelas.forma}</id>
-                    </forma_pagamento>
-               </parcela>`).join('')}
-            </parcelas>
-          </pedido > `;
+        // Função para criar um nó XML se o valor não estiver vazio
+        const createXmlNodeIfNotEmpty = (nodeName, value) => {
+            return value !== '' ? `<${nodeName}>${value}</${nodeName}>` : '';
+        };
 
-        // console.log(xml);
+        const xml = `<?xml version="1.0"?>
+            <pedido>
+              ${createXmlNodeIfNotEmpty('vlr_desconto', this.state.valorDesconto)}
+            //   ${createXmlNodeIfNotEmpty('data_prevista', dataPrevistaFormatted)}
+              ${createXmlNodeIfNotEmpty('obs', this.state.observacoes)}
+              ${createXmlNodeIfNotEmpty('obs_internas', this.state.observacaointerna)}
+              ${createXmlNodeIfNotEmpty('vendedor', this.state.vendedor)}
+              ${createXmlNodeIfNotEmpty('vlr_frete', this.state.frete)}
+              ${createXmlNodeIfNotEmpty('loja', this.state.idLoja)}
+              <cliente>
+                ${createXmlNodeIfNotEmpty('nome', this.state.nome)}
+                ${createXmlNodeIfNotEmpty('cpf_cnpj', this.state.cnpj)}
+                ${createXmlNodeIfNotEmpty('tipoPessoa', this.state.tipo)}
+                ${createXmlNodeIfNotEmpty('ie', this.state.ie)}
+                ${createXmlNodeIfNotEmpty('rg', this.state.rg)}
+                ${createXmlNodeIfNotEmpty('contribuinte', this.state.contribuinte)}
+                ${createXmlNodeIfNotEmpty('endereco', this.state.endereco)}
+                ${createXmlNodeIfNotEmpty('numero', this.state.numero)}
+                ${createXmlNodeIfNotEmpty('complemento', this.state.complemento)}
+                ${createXmlNodeIfNotEmpty('bairro', this.state.bairro)}
+                ${createXmlNodeIfNotEmpty('cep', this.state.cep)}
+                ${createXmlNodeIfNotEmpty('cidade', this.state.cidade)}
+                ${createXmlNodeIfNotEmpty('uf', this.state.uf)}
+                ${createXmlNodeIfNotEmpty('fone', this.state.fone)}
+                ${createXmlNodeIfNotEmpty('celular', this.state.celular)}
+                ${createXmlNodeIfNotEmpty('email', this.state.email)}
+                ${createXmlNodeIfNotEmpty('dataNascimento', this.state.dataNascimento)}
+              </cliente>
+              <itens>
+                ${itens.map((item) => `
+                  <item>
+                    ${createXmlNodeIfNotEmpty('codigo', item.codigo)}
+                    ${createXmlNodeIfNotEmpty('descricao', item.descricao)}
+                    ${createXmlNodeIfNotEmpty('un', item.un)}
+                    ${createXmlNodeIfNotEmpty('qtde', item.qtde)}
+                    ${createXmlNodeIfNotEmpty('vlr_unit', item.vlr_unit)}
+                    ${createXmlNodeIfNotEmpty('vlr_desconto', item.descontoItemLista)}
+                  </item>`).join('')}
+              </itens>
+              <parcelas>
+                ${prazo.map((parcelas) => `
+                  <parcela>
+                    ${createXmlNodeIfNotEmpty('dias', parcelas.dias)}
+                    ${createXmlNodeIfNotEmpty('data', parcelas.data)}
+                    ${createXmlNodeIfNotEmpty('vlr', parcelas.valor)}
+                    ${createXmlNodeIfNotEmpty('obs', parcelas.observacao)}
+                    <forma_pagamento>
+                      ${createXmlNodeIfNotEmpty('id', parcelas.forma)}
+                    </forma_pagamento>
+                  </parcela>`).join('')}
+              </parcelas>
+            </pedido>`;
+
+        console.log(xml);
 
         const xmlContato = ('xml', xml);
 
@@ -1771,8 +1799,9 @@ class FrenteCaixa extends React.Component {
         return xml;
     };
 
-
-    // -------------------------------------------- FUNÇÕES PARCELAS ---------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ------------------------------------------------- FUNÇÕES PARCELAS ---------------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     handleChange(event) {
         this.setState({
@@ -1852,8 +1881,7 @@ class FrenteCaixa extends React.Component {
 
         // console.log("dias", dias)
         // console.log("data", dataFormatada)
-    }
-
+    };
 
     handleValorChangeParcela(index, campo, valor) {
         const parcelas = [...this.state.parcelas];
@@ -1946,7 +1974,9 @@ class FrenteCaixa extends React.Component {
         return `${dia}/${mes}/${ano}`;
     };
 
-    // --------------------------------------- FUNÇÕES ACRESCENTA .00 CAMPOS ----------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ------------------------------------------- FUNÇÕES ACRESCENTA .00 CAMPOS --------------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     formatarPreco = (event) => {
         let preco = event.target.value.trim();
@@ -1988,7 +2018,9 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-    // --------------------------------------- FUNÇÕES EDITAR LISTA DE PRODUTOS (MODAL) ----------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------|
+    // ------------------------------------ FUNÇÕES EDITAR LISTA DE PRODUTOS (MODAL) ----------------------------------------|
+    //-----------------------------------------------------------------------------------------------------------------------|
 
     modalEditarProduto = (produto) => {
         const index = this.state.produtosSelecionados.findIndex((p) => p.produto.id === produto.produto.id);
@@ -2083,7 +2115,7 @@ class FrenteCaixa extends React.Component {
                 precoUnitario = novoPreco;
             } else {
                 precoUnitario = preco;
-            }
+            };
 
             produtosAtualizados[produtoSelecionadoIndex] = {
                 ...produtosAtualizados[produtoSelecionadoIndex],
@@ -2103,9 +2135,8 @@ class FrenteCaixa extends React.Component {
                 quantidade: '',
                 descontoItem: '',
             });
-        }
+        };
     };
-
 
     atualizaSubTotalLista = () => {
         const { quantidadeLista, valorUnitarioLista } = this.state;
@@ -2118,19 +2149,18 @@ class FrenteCaixa extends React.Component {
     fecharModalEditarProduto = () => {
         this.setState({
             modalEditarProduto: false,
-        })
+        });
     };
 
+    //-----------------------------------------------------------------------------------------------------------------------
     // --------------------------------------- BOTÃO LEITOR DE CODIGO DE BARRAS ----------------------------------------
+    //-----------------------------------------------------------------------------------------------------------------------
 
     handleSwitchChange = () => {
         this.setState((prevState) => ({
             isChecked: !prevState.isChecked
         }));
     };
-
-
-
 
     render() {
 
@@ -2610,7 +2640,6 @@ class FrenteCaixa extends React.Component {
                                             </Col>
                                         </Row>
 
-
                                         <Modal show={this.state.ModalCadastrarCliente} onHide={this.ModalCadastrarCliente} size="xl" centered>
                                             <Modal.Header closeButton className="bg-secondary text-white">
                                                 <BsPersonAdd className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
@@ -3003,7 +3032,6 @@ class FrenteCaixa extends React.Component {
                                 </Col>
                             </Row>
                         </div>
-
                     </Form>
 
                     {/* ---------------------------------------------------------- MODALS ---------------------------------------------------------- */}
