@@ -19,6 +19,8 @@ import { Alert } from "react-bootstrap";
 import { Offcanvas } from 'react-bootstrap';
 import { Image } from 'react-bootstrap';
 import { InputGroup } from "react-bootstrap";
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { BsInfoCircle } from 'react-icons/bs';
 
 import { BsShieldFillExclamation } from 'react-icons/bs';
 import { BsPersonAdd } from 'react-icons/bs';
@@ -1731,13 +1733,17 @@ class FrenteCaixa extends React.Component {
 
         // Função para criar um nó XML se o valor não estiver vazio
         const createXmlNodeIfNotEmpty = (nodeName, value) => {
-            return value !== '' ? `<${nodeName}>${value}</${nodeName}>` : '';
+            if (value !== '' && value !== undefined) {
+                return `<${nodeName}>${value}</${nodeName}>`;
+            } else {
+                return '';
+            };
         };
 
         const xml = `<?xml version="1.0"?>
             <pedido>
               ${createXmlNodeIfNotEmpty('vlr_desconto', this.state.valorDesconto)}
-            //   ${createXmlNodeIfNotEmpty('data_prevista', dataPrevistaFormatted)}
+              ${createXmlNodeIfNotEmpty('data_prevista', dataPrevistaFormatted)}
               ${createXmlNodeIfNotEmpty('obs', this.state.observacoes)}
               ${createXmlNodeIfNotEmpty('obs_internas', this.state.observacaointerna)}
               ${createXmlNodeIfNotEmpty('vendedor', this.state.vendedor)}
@@ -2562,7 +2568,18 @@ class FrenteCaixa extends React.Component {
                                             <Col className="col" xs={12} md={5}>
                                                 <div className="busca-cliente d-grid gap-2">
                                                     <Form.Group className="mb-3">
-                                                        <Form.Label htmlFor="cliente" className="texto-campos">Cliente (Nome)</Form.Label>
+                                                        <OverlayTrigger
+                                                            placement="bottom"
+                                                            overlay={
+                                                                <Tooltip id="nomePdvInfo">
+                                                                    Histórico financeiro.
+                                                                </Tooltip>
+                                                            }>
+                                                            <Form.Label htmlFor="cliente" className="texto-campos">
+                                                                Cliente (Nome) <BsInfoCircle className="icon-info" />
+                                                            </Form.Label>
+                                                        </OverlayTrigger>
+
                                                         <InputGroup>
                                                             <Form.Control required type="text" className="form-control" placeholder="Digite o nome do cliente" value={buscaContato || nome} onChange={this.atualizarBuscaContato}
                                                                 onKeyDown={(e) => {
@@ -2865,7 +2882,17 @@ class FrenteCaixa extends React.Component {
                                             </Col>
                                             <Col className="col">
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label htmlFor="observacaointerna" className="texto-campos">Observações internas</Form.Label>
+                                                    <OverlayTrigger
+                                                        placement="bottom"
+                                                        overlay={
+                                                            <Tooltip id="informacaoInternaPdvInfo">
+                                                                Informação de uso interno. Não será impressa.
+                                                            </Tooltip>
+                                                        }>
+                                                        <Form.Label htmlFor="observacaointerna" className="texto-campos">
+                                                            Observações internas <BsInfoCircle className="icon-info" />
+                                                        </Form.Label>
+                                                    </OverlayTrigger>
                                                     <textarea className="form-control" id="observacaointerna" rows="2" value={observacaointerna || ''} onChange={this.atualizaObservacaoInterna} ></textarea>
                                                 </Form.Group>
                                             </Col>
@@ -2884,7 +2911,17 @@ class FrenteCaixa extends React.Component {
                                         </Col>
                                         <Col className="col" xs={3}>
                                             <Form.Group className="mb-3">
-                                                <Form.Label htmlFor="trocodinheiro" className="texto-campos">Troco em dinheiro</Form.Label>
+                                                <OverlayTrigger
+                                                    placement="bottom"
+                                                    overlay={
+                                                        <Tooltip id="trocoPdvInfo">
+                                                            O valor do troco é calculado a partir das parcelas à vista e com forma de pagamento do tipo Dinheiro ou Cheque..
+                                                        </Tooltip>
+                                                    }>
+                                                    <Form.Label htmlFor="trocodinheiro" className="texto-campos">
+                                                        Troco em dinheiro <BsInfoCircle className="icon-info" />
+                                                    </Form.Label>
+                                                </OverlayTrigger>
                                                 <Form.Control type="text" id="trocodinheiro" className="form-control" name="trocodinheiro" placeholder="00,00" defaultValue={troco ? troco.toLocaleString('pt-BR', { minimumFractionDigits: 2 }).replace('.', ',') : ''} disabled />
                                             </Form.Group>
                                         </Col>
@@ -2905,7 +2942,17 @@ class FrenteCaixa extends React.Component {
                                         </Col>
                                         <Col className="col mb-3" xs={2}>
                                             <Form.Group className="mb-3">
-                                                <Form.Label>Condição</Form.Label>
+                                                <OverlayTrigger
+                                                    placement="bottom"
+                                                    overlay={
+                                                        <Tooltip id="condicaoPdvInfo">
+                                                            Número de parcelas ou prazos. Exemplo 30, 60, 90, 120.
+                                                        </Tooltip>
+                                                    }>
+                                                    <Form.Label>
+                                                        Condição <BsInfoCircle className="icon-info" />
+                                                    </Form.Label>
+                                                </OverlayTrigger>
                                                 <Form.Control type="text" className="form-control" name="trocodinheiro" value={this.state.prazo || ''} onChange={this.handleChangePrazo} />
                                             </Form.Group>
                                         </Col>

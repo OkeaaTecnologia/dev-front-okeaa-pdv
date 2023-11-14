@@ -184,9 +184,9 @@
 }
 
 /* .modal-produto-header,
-.modal-produto-body {
-  background-color: rgba(114, 114, 114, 0.048);
-} */
+  .modal-produto-body {
+    background-color: rgba(114, 114, 114, 0.048);
+  } */
 
 /* Aumentando a largura da barra de rolagem */
 ::-webkit-scrollbar {
