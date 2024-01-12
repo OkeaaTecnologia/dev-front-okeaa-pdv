@@ -3,11 +3,11 @@ import React from "react";
 import '../css/FrenteCaixa.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
+import 'react-medium-image-zoom/dist/styles.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faSearch } from '@fortawesome/free-solid-svg-icons';
 
-import { Spinner } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { Modal } from 'react-bootstrap';
 import { Container } from 'react-bootstrap'
@@ -20,8 +20,9 @@ import { Offcanvas } from 'react-bootstrap';
 import { Image } from 'react-bootstrap';
 import { InputGroup } from "react-bootstrap";
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { BsInfoCircle } from 'react-icons/bs';
+import { CloseButton } from 'react-bootstrap';
 
+import { BsInfoCircle } from 'react-icons/bs';
 import { BsShieldFillExclamation } from 'react-icons/bs';
 import { BsPersonAdd } from 'react-icons/bs';
 import { BsClipboardCheck } from 'react-icons/bs';
@@ -29,7 +30,12 @@ import { BsListCheck } from 'react-icons/bs';
 import { BsXCircle } from 'react-icons/bs';
 import { BsTrashFill } from 'react-icons/bs';
 import { BsPencilSquare } from 'react-icons/bs';
+import { BsArrowDown } from "react-icons/bs";
 
+import Zoom from 'react-medium-image-zoom';
+
+
+// import { Spinner } from 'react-bootstrap';
 // import { ToastContainer, toast } from 'react-toastify';
 // import ptBR from 'date-fns/locale/pt-BR';
 // import DatePicker from 'react-datepicker';
@@ -119,7 +125,6 @@ class FrenteCaixa extends React.Component {
             carregandoContato: '',
             carregandoVendedor: '',
             dataPrevista: '',
-            dataPrevistaFormatted: '',
             data: '',
             valor: '',
             observacao: '',
@@ -132,18 +137,18 @@ class FrenteCaixa extends React.Component {
             vlr_desconto: '',
             depositoSelecionado: null,
             erro: null,
-            ModalFinalizarVendaSemItem: false,
-            ModalExcluirPedido: false,
+            modalFinalizarVendaSemItem: false,
+            modalExcluirPedido: false,
             modalInserirProduto: false,
             modalSalvarPedido: false,
             modalInserirParcela: false,
             modalEditarProduto: false,
+            modalSelecionarLoja: false,
+            modalCadastrarCliente: false,
+            modalFormaPagamento: false,
+            modalExcluirProduto: false,
+            modalCpfValido: false,
             canvasFinalizarPedido: false,
-            ModalSelecionarLoja: false,
-            ModalCadastrarCliente: false,
-            ModalFormaPagamento: false,
-            ModalExcluirProduto: false,
-            ModalCpfValido: false,
             freteInserido: false,
             carregando: false,
             carregado: false,
@@ -152,11 +157,30 @@ class FrenteCaixa extends React.Component {
             contatoNaoLocalizado: false,
             vendedorNaoLocalizado: false,
             primeiroProdutoDesconto: false,
-            isChecked: false,
             cpfValido: false,
             cnpjValido: false,
             opcaoDescontoItem: 'desliga',
             opcaoDescontoLista: 'desliga',
+            precoLista: '',
+            precoBling: '',
+            produtoSelecionadoLista: '',
+            dadosCarregados: false,
+            gerarparcelas: '',
+            idLista: '',
+            dataNascimento: '',
+            codigo: '',
+            fantasia: '',
+            ie_rg: '',
+            subTotalGeral: 0,
+            listaspreco: [],
+            descontoInicialProduto: 0,
+            valorLista: 0,
+            quantidadeLista: 0,
+            descontoItemLista: 0,
+            valorUnitarioLista: 0,
+            subTotalLista: 0,
+            objeto: '',
+            modalPedidoExcluido: false,
         };
 
         this.atualizaDesconto = this.atualizaDesconto.bind(this);
@@ -166,42 +190,54 @@ class FrenteCaixa extends React.Component {
         this.handleChangePrazo = this.handleChangePrazo.bind(this);
     };
 
-    ModalCadastrarCliente = () => {
+    modalCadastrarCliente = () => {
         this.setState({
-            ModalCadastrarCliente: !this.state.ModalCadastrarCliente,
+            modalCadastrarCliente: !this.state.modalCadastrarCliente,
             contatoNaoLocalizado: false
         });
     };
 
-    ModalCpfValido = () => {
+    modalCpfValido = () => {
         this.setState((prevState) => ({
-            ModalCpfValido: !prevState.ModalCpfValido,
+            modalCpfValido: !prevState.modalCpfValido,
         }));
     };
 
-    ModalSelecionarLoja = () => {
+    modalSelecionarLoja = () => {
         this.setState({
-            ModalSelecionarLoja: !this.state.ModalSelecionarLoja
+            modalSelecionarLoja: !this.state.modalSelecionarLoja
         });
     };
 
-    ModalFinalizarVendaSemItem = () => {
+    modalFinalizarVendaSemItem = () => {
         this.setState({
-            ModalFinalizarVendaSemItem: !this.state.ModalFinalizarVendaSemItem
+            modalFinalizarVendaSemItem: !this.state.modalFinalizarVendaSemItem
         });
     };
 
-    ModalFormaPagamento = () => {
+    modalFormaPagamento = () => {
         this.setState({
-            ModalFormaPagamento: !this.state.ModalFormaPagamento
+            modalFormaPagamento: !this.state.modalFormaPagamento
         });
     };
 
-    ModalExcluirPedido = () => {
+    modalExcluirPedido = () => {
         this.buscarPedido();
 
         this.setState({
-            ModalExcluirPedido: !this.state.ModalExcluirPedido
+            modalExcluirPedido: !this.state.modalExcluirPedido
+        });
+    };
+
+    modalPedidoExcluido = () => {
+        this.setState({
+            modalPedidoExcluido: !this.state.modalPedidoExcluido
+        }, () => {
+            setTimeout(() => {
+                this.setState({
+                    modalPedidoExcluido: false
+                })
+            }, 3000);
         });
     };
 
@@ -213,7 +249,7 @@ class FrenteCaixa extends React.Component {
 
     modalExcluirProduto = () => {
         this.setState({
-            ModalExcluirProduto: !this.state.ModalExcluirProduto
+            modalExcluirProduto: !this.state.modalExcluirProduto
         });
     };
 
@@ -241,47 +277,47 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-    componentDidMount() {
-        this.buscarFormaDePagamento()
-            .catch(() => { throw new Error("Erro ao conectar a API"); })
-            .then(() => this.buscarLoja())
-            .catch(() => { throw new Error("Erro ao conectar a API"); })
-            .then(() => this.buscarPedido())
-            .catch(() => { throw new Error("Erro ao conectar a API"); })
-        //     .then(() => {
-        //         this.setState({ carregado: true });
-        //     })
-        //     .catch((error) => {
-        //         this.setState({ erro: error.message });
-        //     });
-        this.ModalSelecionarLoja();
+    async componentDidMount() {
+        try {
+            this.buscarLoja()
+            this.modalSelecionarLoja();
+            this.buscarFormaDePagamento()
+            this.buscarPedido()
+            this.buscarListaPreco();
 
-        this.setState({ carregado: true }); //APAGAR (GAMBIARRA)
+            this.setState({ carregado: true }); //APAGAR (GAMBIARRA)
+        } catch (error) {
+            this.setState({ erro: `Erro ao conectar a API: ${error.message}` });
+        }
     };
 
     componentDidUpdate(prevProps, prevState) {
         if (prevState.nome !== this.state.nome) {
             this.atualizaNome({ target: { value: this.state.nome } });
-        };
+        }
+
         if (prevState.cnpj !== this.state.cnpj) {
             this.atualizaCpfCnpj({ target: { value: this.state.cnpj } });
-        };
-        if (prevState.descontoItemLista !== this.state.descontoItemLista) {
-            this.atualizaSubTotalLista({ target: { value: this.state.descontoItemLista } })
-        };
+        }
 
-        if (prevState.produtosSelecionados !== this.state.produtosSelecionados ||
+        if (prevState.descontoItemLista !== this.state.descontoItemLista) {
+            this.atualizaSubTotalLista({ target: { value: this.state.descontoItemLista } });
+        }
+
+        if (prevState.idLoja !== this.state.idLoja) {
+            this.atualizaNomeLoja({ target: { value: this.state.idLoja } });
+        }
+
+        if (
+            prevState.produtosSelecionados !== this.state.produtosSelecionados ||
             prevState.subTotal !== this.state.subTotal ||
             prevState.valorDesconto !== this.state.valorDesconto ||
             prevState.subTotalComFrete !== this.state.subTotalComFrete
         ) {
             const subtotalGeral = this.calcularSubTotalGeral().toFixed(2);
-            // console.log("Subtotal Geral:", subtotalGeral);
-            this.setState({
-                subTotalGeral: subtotalGeral
-            });
-        };
-    };
+            this.setState({ subTotalGeral: subtotalGeral });
+        }
+    }
 
     /**
      *  -------------------- CHAMADAS E CONSUMO DAS API´s QUE COMPÕE O PDV. -------------------- 
@@ -301,7 +337,7 @@ class FrenteCaixa extends React.Component {
                     return resposta.json();
                 })
                 .then((dados) => {
-                    console.log("Produto: ", dados)
+                    // console.log("Produto: ", dados)
                     if (dados.retorno.produtos) {
                         const palavrasBusca = value.toLowerCase().split(' ');
 
@@ -331,7 +367,7 @@ class FrenteCaixa extends React.Component {
                                 produtos: [],
                                 produtoSelecionado: null,
                                 carregando: false,
-                                produtoNaoLocalizado: true // Adicione essa variável de estado para controlar se o produto não foi localizado
+                                produtoNaoLocalizado: true
                             });
                         } else {
                             // Produtos encontrados
@@ -339,7 +375,7 @@ class FrenteCaixa extends React.Component {
                                 produtos: produtosFiltrados,
                                 produtoSelecionado: null,
                                 carregando: false,
-                                produtoNaoLocalizado: false // Reinicie a variável para false caso tenha sido setada anteriormente
+                                produtoNaoLocalizado: false
                             });
                         }
                     } else {
@@ -347,7 +383,7 @@ class FrenteCaixa extends React.Component {
                         this.setState({
                             produtos: [],
                             carregando: false,
-                            produtoNaoLocalizado: true // Adicione essa variável de estado para controlar se o produto não foi localizado
+                            produtoNaoLocalizado: true
                         });
                     }
                     resolve();
@@ -356,7 +392,7 @@ class FrenteCaixa extends React.Component {
                     this.setState({
                         produtos: [],
                         carregando: false,
-                        produtoNaoLocalizado: true // Adicione essa variável de estado para controlar se o produto não foi localizado
+                        produtoNaoLocalizado: true
                     });
                     reject(error);
                 });
@@ -426,7 +462,7 @@ class FrenteCaixa extends React.Component {
                             contatos: [],
                             contatoSelecionado: null,
                             carregando: false,
-                            contatoNaoLocalizado: true // Adicione essa variável de estado para controlar se o contato não foi localizado
+                            contatoNaoLocalizado: true
                         });
                     } else {
                         // Contatos encontrados
@@ -434,7 +470,7 @@ class FrenteCaixa extends React.Component {
                             contatos: contatosFiltrados,
                             contatoSelecionado: null,
                             carregando: false,
-                            contatoNaoLocalizado: false // Reinicie a variável para false caso tenha sido setada anteriormente
+                            contatoNaoLocalizado: false
                         });
                     }
                 } else {
@@ -442,7 +478,7 @@ class FrenteCaixa extends React.Component {
                     this.setState({
                         contatos: [],
                         carregando: false,
-                        contatoNaoLocalizado: true // Adicione essa variável de estado para controlar se o contato não foi localizado
+                        contatoNaoLocalizado: true
                     });
                 }
             })
@@ -451,7 +487,7 @@ class FrenteCaixa extends React.Component {
                 this.setState({
                     contatos: [],
                     carregando: false,
-                    contatoNaoLocalizado: true // Adicione essa variável de estado para controlar se o contato não foi localizado
+                    contatoNaoLocalizado: true
                 });
             });
     };
@@ -488,15 +524,15 @@ class FrenteCaixa extends React.Component {
                                 (contato?.contato?.nome?.toLowerCase().includes(value.toLowerCase()) ||
                                     contato?.contato?.codigo?.toLowerCase().includes(value.toLowerCase()))
                         );
-                        console.log("dados: ", dados);
-                        console.log("vendedor: ", vendedoresFiltrados);
+                        // console.log("dados: ", dados);
+                        // console.log("vendedor: ", vendedoresFiltrados);
                         if (vendedoresFiltrados.length === 0) {
                             // Nenhum vendedor encontrado
                             this.setState({
                                 vendedores: [],
                                 vendedorSelecionado: null,
                                 carregando: false,
-                                vendedorNaoLocalizado: true // Adicione essa variável de estado para controlar se o vendedor não foi localizado
+                                vendedorNaoLocalizado: true
                             });
                         } else {
                             // Vendedores encontrados
@@ -504,7 +540,7 @@ class FrenteCaixa extends React.Component {
                                 vendedores: vendedoresFiltrados,
                                 vendedorSelecionado: null,
                                 carregando: false,
-                                vendedorNaoLocalizado: false // Reinicie a variável para false caso tenha sido setada anteriormente
+                                vendedorNaoLocalizado: false
                             });
                         }
                     } else {
@@ -512,7 +548,7 @@ class FrenteCaixa extends React.Component {
                         this.setState({
                             vendedores: [],
                             carregando: false,
-                            vendedorNaoLocalizado: true // Adicione essa variável de estado para controlar se o vendedor não foi localizado
+                            vendedorNaoLocalizado: true
                         });
                     }
                     resolve();
@@ -522,7 +558,7 @@ class FrenteCaixa extends React.Component {
                     this.setState({
                         vendedores: [],
                         carregando: false,
-                        vendedorNaoLocalizado: true // Adicione essa variável de estado para controlar se o vendedor não foi localizado
+                        vendedorNaoLocalizado: true
                     });
                     reject(error);
                 });
@@ -657,10 +693,7 @@ class FrenteCaixa extends React.Component {
 
     buscarLoja = () => {
         return new Promise((resolve, reject) => {
-
-            // fetch("https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/selecionarLojas")
             fetch(`http://localhost:8080/api/v1/selecionarLojas`)
-
                 .then((resposta) => {
                     if (!resposta.ok) {
                         throw new Error("Erro na chamada da API");
@@ -668,21 +701,24 @@ class FrenteCaixa extends React.Component {
                     return resposta.json();
                 })
                 .then((dados) => {
-                    if (dados) {
-                        // console.log("Forma de pagamento objeto retornado:", dados);
-                        const idLojas = dados.map((objeto) => objeto.idLoja);
-                        const unidade = dados.map((objeto) => objeto.unidadeLoja);
-                        // console.log("idLojas:", idLojas, "unidade: ", unidade);
+                    if (dados && dados.length > 0) {
+                        // Suponha que você deseja armazenar a primeira loja da lista
+                        const primeiraLoja = dados[0];
+
                         this.setState({
-                            idLoja: idLojas,
-                            unidadeLoja: unidade,
-                            objeto: dados // Defina o estado 'objeto' com 'dados' diretamente
+                            idLoja: primeiraLoja.idLoja,
+                            nomeLoja: primeiraLoja.nomeLoja,
+                            unidadeLoja: primeiraLoja.unidadeLoja,
+                            objeto: dados,
+                            dadosCarregados: true,
                         });
                     } else {
                         this.setState({
-                            idLoja: [], // Defina os estados como arrays vazios se não houver dados
-                            unidadeLoja: [],
-                            objeto: []
+                            idLoja: null,
+                            nomeLoja: null,
+                            unidadeLoja: null,
+                            objeto: [],
+                            dadosCarregados: false,
                         });
                     }
                     this.setState({
@@ -690,16 +726,57 @@ class FrenteCaixa extends React.Component {
                     });
                     resolve();
                 })
-                .catch((error) => {
-                    // console.log("Erro ao buscar forma de pagamento:", error);
+                .catch(error => {
+                    console.error(error);
                     this.setState({
-                        idLoja: [], // Defina os estados como arrays vazios em caso de erro
-                        unidadeLoja: [],
-                        objeto: []
+                        carregando: false,
+                        idLoja: null,
+                        nomeLoja: null,
+                        unidadeLoja: null,
+                        objeto: [],
+                        dadosCarregados: false,
                     });
-                    reject(error);
                 });
         });
+    };
+
+
+    //----------------------------------------- API BUSCA LISTA DE PREÇO ----------------------------------------------------------
+
+    buscarListaPreco = () => {
+        fetch("http://localhost:8081/api/v1/selecionarListas", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Assume que data é um array onde cada elemento possui uma propriedade produtoLista
+                // console.log(data);
+
+                // Extrai a primeira instância de fatorAplicado e baseado
+                const primeiraInstancia = data[0];
+                const fatorAplicado = primeiraInstancia ? primeiraInstancia.fatorAplicado : undefined;
+                const baseado = primeiraInstancia ? primeiraInstancia.baseado : undefined;
+
+                //console.log(fatorAplicado, baseado)
+
+                this.setState({
+                    listaspreco: data,
+                    fatorAplicado: fatorAplicado,
+                    baseado: baseado
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao buscar as lojas:', error);
+
+                this.setState({
+                    nomeListas: [],
+                    listaspreco: [],
+                    numerosDeItens: []
+                });
+            });
     };
 
     //----------------------------------------- API CADASTRAR PEDIDO ----------------------------------------------------------
@@ -720,7 +797,6 @@ class FrenteCaixa extends React.Component {
         });
 
         this.buscarPedido();
-
     };
 
     //----------------------------------------- API´s PUBLICAS (CEP) ----------------------------------------------------------
@@ -1132,23 +1208,71 @@ class FrenteCaixa extends React.Component {
     selecionarProduto = (produto) => {
         const preco = parseFloat(produto.produto.preco).toFixed(2);
         const valorTotal = (parseFloat(produto.produto.preco) * 1).toFixed(2);
+
+        // Verifica se o idLista está disponível
+        if (this.state.idLista !== undefined) {
+            // Obtém a lista de descontos selecionada
+            const listaSelecionada = this.state.listaspreco.find(lista => lista.idLista === this.state.idLista);
+
+            // Verifica se a lista foi selecionada e se o produto está nela
+            const produtoNaListaDesconto = listaSelecionada?.produtoLista.find(item => item.codigo === produto.produto.codigo);
+
+            // console.log("Produto na lista de desconto:", produtoNaListaDesconto);
+
+            if (produtoNaListaDesconto) {
+                // Se o produto estiver na lista de descontos, chame a função buscarListaPreco
+                // console.log("Chamando buscarListaPreco");
+                this.buscarListaPreco();
+
+                // Atualiza o preço com o valor de precoLista, se disponível
+                this.setState({
+                    produtoSelecionado: produto,
+                    preco: produtoNaListaDesconto.precoLista || preco,
+                    precoUnitario: produtoNaListaDesconto.precoLista || preco,
+                    valorTotal: produtoNaListaDesconto.precoLista || preco,
+                    precoBling: produtoNaListaDesconto.preco || '',
+                    produtos: [],
+                    quantidade: 1,
+                    comentario: '',
+                    descontoInicialProduto: '',
+                    imagem: produto.produto.imageThumbnail,
+                    opcaoDescontoItem: 'desliga', // Desativa o switch ao selecionar um novo produto
+                });
+
+                return; // Encerra a função após atualizar o estado
+            }
+        }
+
+        // Se idLista não estiver disponível ou o produto não estiver na lista de descontos, chame a função buscarProdutos
+        // console.log("Chamando buscarProdutos");
+
+        // Mantém o preço original
         this.setState({
             produtoSelecionado: produto,
             preco: preco,
             precoUnitario: preco,
+            precoBling: preco,
             produtos: [],
             quantidade: 1,
             valorTotal: valorTotal,
             comentario: '',
             descontoInicialProduto: '',
-            imagem: produto.produto.imageThumbnail
+            imagem: produto.produto.imageThumbnail,
+            opcaoDescontoItem: 'desliga' // Desliga o switch ao selecionar um novo produto
         });
+
         this.atualizarBuscaProduto({ target: { value: '' } });
     };
 
     adicionarProdutoSelecionado = (produtoSelecionado) => {
 
-        const { produtosSelecionados, quantidade, preco, precoUnitario, descontoInicialProduto } = this.state;
+        const {
+            produtosSelecionados,
+            quantidade,
+            preco,
+            precoUnitario,
+            descontoInicialProduto
+        } = this.state;
 
         if (!produtoSelecionado) {
             this.modalInserirProduto();
@@ -1178,12 +1302,14 @@ class FrenteCaixa extends React.Component {
                     valorTotal: '',
                     precoUnitario: '',
                     preco: '',
+                    precoBling: '',
                     desconto: 0,
                     comentario: '',
                     descontoInicialProduto: '',
                     descontoItem: '',
                     valorUnitarioLista: '',
-                    possuiDesconto: false
+                    possuiDesconto: false,
+                    opcaoDescontoItem: 'desliga', // Desativa o switch ao adicionar um produto
                 },
                 () => {
                     this.calcularTotal();
@@ -1194,6 +1320,7 @@ class FrenteCaixa extends React.Component {
                 produto: produtoSelecionado.produto,
                 quantidade: quantidade,
                 preco: preco,
+                precoBling: '',
                 precoUnitario: precoUnitario,
                 valorUnitarioLista: preco,
                 descontoInicialProduto: descontoInicialProduto,
@@ -1242,6 +1369,32 @@ class FrenteCaixa extends React.Component {
         this.modalExcluirProduto();
     };
 
+    selecionaListaDesconto = (event) => {
+        const idLista = event.target.value; // Pega o ID da lista selecionada
+        this.setState({
+            idLista: idLista
+        });
+    };
+
+    produtoEstaNaListaDeDesconto = (produto) => {
+        const { idLista, listaspreco, produtoSelecionadoLista, produtoSelecionado } = this.state;
+
+        if (idLista !== undefined) {
+            // Obtém a lista de descontos selecionada
+            const listaSelecionada = listaspreco.find(lista => lista.idLista === idLista);
+
+            // Verifica se a lista foi selecionada e se o produto está nela
+            const produtoNaListaDesconto = listaSelecionada?.produtoLista.find(item => item.codigo === produto.produto.codigo);
+
+            // Retorna true se o produto estiver na lista de descontos
+            return !!produtoNaListaDesconto;
+        }
+
+        // Retorna false se idLista não estiver disponível
+        return false;
+    };
+
+
     //-----------------------------------------------------------------------------------------------------------------------|
     // ------------------------------------------------- FUNÇÕES CALCULOS ---------------------------------------------------|
     //-----------------------------------------------------------------------------------------------------------------------|
@@ -1261,21 +1414,56 @@ class FrenteCaixa extends React.Component {
         return parseFloat(subTotal);
     };
 
+    calcularTotalLista = () => {
+        const {
+            produtosSelecionados,
+            idLista,
+            listaspreco
+        } = this.state;
+
+        let totalForaDesconto = 0;
+        let totalNaListaDesconto = 0;
+
+        produtosSelecionados.forEach((produto) => {
+            const precoTotalProduto = produto.quantidade * parseFloat(produto.preco);
+
+            if (this.produtoEstaNaListaDeDesconto(produto)) {
+                totalNaListaDesconto += precoTotalProduto;
+            } else {
+                totalForaDesconto += precoTotalProduto;
+            }
+        });
+
+        return {
+            totalForaDesconto,
+            totalNaListaDesconto
+        };
+    };
+
     calcularSubTotal = (produto, quantidade, preco) => {
         return preco * quantidade
     };
 
     atualizaQuantidade = (event) => {
-        let quantidade = parseFloat(event.target.value);
-        quantidade = isNaN(quantidade) || quantidade <= 0 ? 1 : quantidade;
+        let quantidade = event.target.value.trim(); // Remover espaços em branco no início e no final
 
-        this.setState({
-            quantidade: quantidade
-        }, () => {
-            this.atualizarValorTotal();
-        });
+        if (quantidade === '') {
+            this.setState({
+                quantidade: ''
+            }, () => {
+                this.atualizarValorTotal();
+            });
+        } else {
+            quantidade = parseInt(quantidade, 10);
+            quantidade = isNaN(quantidade) || quantidade <= 0 ? 1 : quantidade;
+
+            this.setState({
+                quantidade: quantidade
+            }, () => {
+                this.atualizarValorTotal();
+            });
+        }
     };
-
 
     atualizaPreco = (event) => {
         const preco = event.target.value.replace(',', '.');
@@ -1469,18 +1657,40 @@ class FrenteCaixa extends React.Component {
         return parseFloat(subTotalGeral);
     };
 
+    atualizaDataPrevista = (event) => {
+        // Obtém o valor do campo de input
+        let valorInput = event.target.value;
+
+        // Remove caracteres não numéricos
+        valorInput = valorInput.replace(/\D/g, '');
+
+        // Formata a data enquanto o usuário digita
+        if (valorInput.length >= 2 && valorInput.length < 4) {
+            valorInput = valorInput.replace(/(\d{2})(\d{0,2})/, '$1/$2');
+        } else if (valorInput.length >= 4) {
+            valorInput = valorInput.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1/$2/$3');
+        }
+
+        // Atualiza o estado com o valor do campo de input
+        this.setState({ dataPrevista: valorInput });
+    }
     //-----------------------------------------------------------------------------------------------------------------------|
     // -------------------------------------- FUNÇÕES TELA SELEÇÃO DE LOJA E UNIDADE ----------------------------------------|
     //-----------------------------------------------------------------------------------------------------------------------|
 
-    atualizaNomeLoja = (event) => {
+    atualizaIdLoja = (event) => {
         const idLoja = event.target.value;
-        console.log("idLoja: ", idLoja);
-        // const unidadeLojaSelecionada = this.state.objeto.find((objeto) => objeto.idLoja === idLoja)?.unidadeLoja || ''; console.log("lojaSelecionada: ", unidadeLojaSelecionada);
-
+        // console.log("idLoja: ", idLoja);
         this.setState({
             idLoja: idLoja,
-            // unidadeLoja: unidadeLojaSelecionada
+        });
+    };
+
+    atualizaNomeLoja = (event) => {
+        const nomeLoja = event.target.value;
+        // console.log("idLoja: ", idLoja);
+        this.setState({
+            nomeLoja: nomeLoja,
         });
     };
 
@@ -1522,6 +1732,7 @@ class FrenteCaixa extends React.Component {
 
     excluirPedido = () => {
         this.setState({
+            // Contato
             vendedor: '',
             vendedorSelecionado: '',
             contatoSelecionado: '',
@@ -1546,7 +1757,9 @@ class FrenteCaixa extends React.Component {
             bairro: '',
             cidade: '',
             uf: '',
-            produtosSelecionados: [], // adiciona a limpeza da lista aqui
+
+            // Produtos
+            produtosSelecionados: [],
             produtoSelecionado: '',
             quantidade: 1,
             desconto: 0,
@@ -1556,12 +1769,20 @@ class FrenteCaixa extends React.Component {
             subTotal: 0,
             valorDesconto: 0,
             totalComDesconto: 0,
+
+            // Pagamento
             dinheiroRecebido: '',
             dinheiro: 0,
             troco: 0,
             condicao: '',
+
+            // Parcelas
             parcelas: [{ dias: 0, observacao: '', valor: '' }],
+
+            // Data
             dataPrevista: '',
+
+            // Outros
             depositoSelecionado: '',
             frete: 0,
             observacoes: '',
@@ -1569,15 +1790,19 @@ class FrenteCaixa extends React.Component {
             subTotalGeral: 0,
             descontoInicialProduto: 0,
             validated: false,
+
+            // Vendedores
             buscaVendedor: '',
-            vendedores: []
+            vendedores: [],
         });
-        this.ModalExcluirPedido();
-        this.modalSalvarPedido();
+
+        this.modalExcluirPedido();
+        this.modalPedidoExcluido();
     };
 
     limparPedido = () => {
         this.setState({
+            // Contato
             vendedor: '',
             vendedorSelecionado: '',
             buscaVendedor: '',
@@ -1603,7 +1828,9 @@ class FrenteCaixa extends React.Component {
             bairro: '',
             cidade: '',
             uf: '',
-            produtosSelecionados: [], // adiciona a limpeza da lista aqui
+
+            // Produtos
+            produtosSelecionados: [],
             quantidade: 1,
             desconto: 0,
             preco: 0,
@@ -1612,19 +1839,29 @@ class FrenteCaixa extends React.Component {
             subTotal: 0,
             valorDesconto: 0,
             totalComDesconto: 0,
+
+            // Pagamento
             dinheiroRecebido: '',
             dinheiro: 0,
             troco: 0,
             condicao: '',
+
+            // Parcelas
             parcelas: [{ dias: 0, observacao: '', valor: '' }],
+
+            // Data
             dataPrevista: '',
+
+            // Outros
             depositoSelecionado: '',
             frete: 0,
             observacoes: '',
             observacaointerna: '',
             descontoInicialProduto: 0,
             validated: false,
-            vendedores: []
+
+            // Vendedores
+            vendedores: [],
         });
     };
 
@@ -1640,16 +1877,13 @@ class FrenteCaixa extends React.Component {
             if (this.validarCPF(this.state.cnpj) || this.validarCNPJ(this.state.cnpj)) {
                 this.finalizaVenda();
             } else {
-                this.ModalCpfValido();
-            };
-        };
+                this.modalCpfValido();
+            }
+        }
     };
 
     finalizaVenda = () => {
-        // const dataPrevista = new Date(this.state.dataPrevista); // converte para objeto Date
-        // const dataPrevistaFormatted = `${dataPrevista.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })} ${dataPrevista.toLocaleTimeString('pt-BR')}`;
-        // console.log(this.state.dataPrevista)
-        // console.log(dataPrevistaFormatted)
+        const dataPrevista = this.state.dataPrevista;
         const condicao = this.state.condicao;
         const nome = this.state.nome;
         const cnpj = this.state.cnpj;
@@ -1712,24 +1946,30 @@ class FrenteCaixa extends React.Component {
         });
 
         if (itens.length === 0) {
-            this.ModalFinalizarVendaSemItem();
+            this.modalFinalizarVendaSemItem();
             return;
         } else if (!condicao || condicao === 'Selecione a forma') {
-            this.ModalFormaPagamento();
+            this.modalFormaPagamento();
             return;
         } else {
             this.canvasFinalizarPedido();
         };
 
         return {
-            nome, cnpj, itens, vendedor, observacoes, observacaointerna, valorDesconto, prazo,
-            // dataPrevista,
-            // dataPrevistaFormatted
+            nome,
+            cnpj,
+            itens,
+            vendedor,
+            observacoes,
+            observacaointerna,
+            valorDesconto,
+            prazo,
+            dataPrevista,
         };
     };
 
     gerarXmlItensParaEnvio = () => {
-        const { itens, prazo, dataPrevistaFormatted = '' } = this.finalizaVenda();
+        const { itens, prazo, dataPrevista = '' } = this.finalizaVenda();
 
         // Função para criar um nó XML se o valor não estiver vazio
         const createXmlNodeIfNotEmpty = (nodeName, value) => {
@@ -1743,7 +1983,7 @@ class FrenteCaixa extends React.Component {
         const xml = `<?xml version="1.0"?>
             <pedido>
               ${createXmlNodeIfNotEmpty('vlr_desconto', this.state.valorDesconto)}
-              ${createXmlNodeIfNotEmpty('data_prevista', dataPrevistaFormatted)}
+              ${createXmlNodeIfNotEmpty('data_prevista', dataPrevista)}
               ${createXmlNodeIfNotEmpty('obs', this.state.observacoes)}
               ${createXmlNodeIfNotEmpty('obs_internas', this.state.observacaointerna)}
               ${createXmlNodeIfNotEmpty('vendedor', this.state.vendedor)}
@@ -1793,7 +2033,7 @@ class FrenteCaixa extends React.Component {
               </parcelas>
             </pedido>`;
 
-        console.log(xml);
+        // console.log(xml);
 
         const xmlContato = ('xml', xml);
 
@@ -1834,7 +2074,6 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-
     handleChangeParcela(index, campo, valor) {
         const parcelas = [...this.state.parcelas];
         parcelas[index][campo] = valor;
@@ -1843,50 +2082,99 @@ class FrenteCaixa extends React.Component {
         });
     };
 
-    adicionarParcela() {
-        const { condicao } = this.state;
-        const { prazo } = this.state;
-        // console.log("prazo: ", prazo)
-        const dias = parseInt(prazo);
+    // PARCELA POR PARCELA EXEMPLO: 30 GERAR PARCELA, 60 GERAR PARCELA, 90 GERAR PARCELA, UMA POR UMA 
+    // adicionarParcela() {
+    //     const { condicao } = this.state;
+    //     const { prazo } = this.state;
+    //     // console.log("prazo: ", prazo)
+    //     const dias = parseInt(prazo);
+    //     const forma = condicao;
+    //     const hoje = new Date();
+    //     const data = new Date(hoje.getTime() + parseInt(dias) * 24 * 60 * 60 * 1000);
+    //     const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    //     const novaParcela = {
+    //         dias: prazo,
+    //         data: dataFormatada,
+    //         valor: '',
+    //         forma, // Atribui o valor de "condicao" em "forma"
+    //         observacao: '',
+    //         acao: '',
+    //     };
+
+    //     let parcelas = [...this.state.parcelas];
+    //     const index = parcelas.findIndex((parcela) => parcela.dias === 0);
+
+    //     if (index !== -1) {
+    //         parcelas.splice(index, 1);
+    //     };
+
+    //     parcelas = [...parcelas, novaParcela];
+
+    //     // Divide o valor total entre as parcelas
+    //     const numParcelas = parcelas.length;
+    //     const valorParcela = (this.state.subTotalGeral / numParcelas).toFixed(2);
+
+    //     // Atualiza o valor de cada parcela
+    //     const newParcelas = parcelas.map((parcela, i) => ({
+    //         ...parcela,
+    //         valor: valorParcela,
+    //     }));
+
+    //     this.setState({
+    //         numLinhas: this.state.numLinhas + 1,
+    //         parcelas: newParcelas,
+    //     });
+
+    //     // console.log("dias", dias)
+    //     // console.log("data", dataFormatada)
+    // };
+
+    //VARIAS PARCELAS EXEMPLO: 30 60 90 GERAR PARCELAS, AO GERAR É CRIADO 3 LINHAS CONFORME 30, 60 E 90 DIAS.
+    adicionarParcela = () => {
+        const { condicao, prazo } = this.state;
+
+        // Remova os espaços e divida a string em números
+        const dias = prazo.trim().split(/\s+/).map(valor => parseInt(valor));
+
+        // Verifique se o último item da lista é NaN (não é um número)
+        if (isNaN(dias[dias.length - 1])) {
+            // Se não for um número, remova o último item
+            dias.pop();
+        }
+
+        // Se não houver números válidos, saia da função
+        if (dias.length === 0) {
+            return;
+        }
+
         const forma = condicao;
+
         const hoje = new Date();
-        const data = new Date(hoje.getTime() + parseInt(dias) * 24 * 60 * 60 * 1000);
-        const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        const novaParcela = {
-            dias: prazo,
-            data: dataFormatada,
-            valor: '',
-            forma, // Atribui o valor de "condicao" em "forma"
-            observacao: '',
-            acao: '',
-        };
+        const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-        let parcelas = [...this.state.parcelas];
-        const index = parcelas.findIndex((parcela) => parcela.dias === 0);
+        const novasParcelas = dias.map((valor, index) => {
+            return {
+                dias: valor,
+                data: this.calcularData(valor),
+                valor: '',
+                forma,
+                observacao: '',
+                acao: '',
+            };
+        });
 
-        if (index !== -1) {
-            parcelas.splice(index, 1);
-        };
-
-        parcelas = [...parcelas, novaParcela];
-
-        // Divide o valor total entre as parcelas
-        const numParcelas = parcelas.length;
+        const numParcelas = novasParcelas.length;
         const valorParcela = (this.state.subTotalGeral / numParcelas).toFixed(2);
 
-        // Atualiza o valor de cada parcela
-        const newParcelas = parcelas.map((parcela, i) => ({
+        const primeiraLinha = novasParcelas.shift(); // Remova a primeira linha do array
+        const newParcelas = [primeiraLinha, ...novasParcelas].map((parcela, i) => ({
             ...parcela,
             valor: valorParcela,
         }));
 
-        this.setState({
-            numLinhas: this.state.numLinhas + 1,
-            parcelas: newParcelas,
-        });
-
-        // console.log("dias", dias)
-        // console.log("data", dataFormatada)
+        this.setState((prevState) => ({
+            parcelas: [...newParcelas],
+        }));
     };
 
     handleValorChangeParcela(index, campo, valor) {
@@ -1894,16 +2182,16 @@ class FrenteCaixa extends React.Component {
         const numParcelas = parcelas.length;
 
         // Calcula a soma total dos valores das parcelas
-        // const valorTotalParcelas = parcelas.reduce((acc, curr) => acc + parseFloat(curr.valor || 0), 0);
+        const valorTotalParcelas = parcelas.reduce((acc, curr) => acc + parseFloat(curr.valor || 0), 0);
 
         // Calcula o valor atual da parcela selecionada
         const valorAtualParcela = parseFloat(parcelas[index].valor || 0);
 
         // Calcula a diferença de valor a ser aplicada nas demais parcelas
-        const diferenca = (valorAtualParcela - valor) / (numParcelas - 1);
+        const diferenca = (valorAtualParcela - parseFloat(valor)) / (numParcelas - 1);
 
         // Atualiza o valor da parcela selecionada
-        parcelas[index][campo] = valor;
+        parcelas[index][campo] = parseFloat(valor);
 
         // Atualiza os valores das outras parcelas com a diferença calculada
         const newParcelas = parcelas.map((parcela, i) => {
@@ -2029,28 +2317,26 @@ class FrenteCaixa extends React.Component {
     //-----------------------------------------------------------------------------------------------------------------------|
 
     modalEditarProduto = (produto) => {
-        const index = this.state.produtosSelecionados.findIndex((p) => p.produto.id === produto.produto.id);
+        const { produtosSelecionados, valorUnitarioAtualizado } = this.state;
+        const index = produtosSelecionados.findIndex((p) => p.produto.id === produto.produto.id);
         const { preco } = produto.produto;
         const valorUnitario = produto.precoUnitario || (preco ? preco.toString() : '');
 
-        this.setState(
-            {
-                modalEditarProduto: true,
-                produtoSelecionadoIndex: index,
-                produtoSelecionadoLista: produto,
-                valorLista: preco ? parseFloat(preco).toFixed(2) : '',
-                quantidadeLista: produto.quantidade || '',
-                descontoItemLista: produto.descontoItem || produto.descontoInicialProduto,
-                valorUnitarioLista: this.state.valorUnitarioAtualizado || valorUnitario, // Utiliza o valorUnitarioAtualizado se estiver definido, caso contrário, utiliza o valor original
-                valorTotalLista: produto.subTotal || '',
-                observacaointerna: produto.observacaointerna || '',
-                valorUnitarioOriginal: preco ? parseFloat(preco).toFixed(2) : '', // Salva o valor original do campo PRECO UNITARIO
-                valorUnitarioAtualizado: null // Limpa o valorUnitarioAtualizado ao abrir o modal
-            },
-            () => {
-                this.atualizaSubTotalLista();
-            }
-        );
+        this.setState({
+            modalEditarProduto: true,
+            produtoSelecionadoIndex: index,
+            produtoSelecionadoLista: produto,
+            valorLista: preco ? parseFloat(preco).toFixed(2) : '',
+            quantidadeLista: produto.quantidade || '',
+            descontoItemLista: produto.descontoItem || produto.descontoInicialProduto,
+            valorUnitarioLista: valorUnitarioAtualizado || valorUnitario,
+            valorTotalLista: produto.subTotal || '',
+            observacaointerna: produto.observacaointerna || '',
+            valorUnitarioOriginal: preco ? parseFloat(preco).toFixed(2) : '',
+            valorUnitarioAtualizado: null
+        }, () => {
+            this.atualizaSubTotalLista();
+        });
     };
 
     atualizaValorLista = (event) => {
@@ -2080,7 +2366,10 @@ class FrenteCaixa extends React.Component {
     };
 
     aplicaDescontoItem = () => {
-        const { descontoItemLista, valorUnitarioOriginal } = this.state;
+        const {
+            descontoItemLista,
+            valorUnitarioOriginal
+        } = this.state;
 
         if (descontoItemLista !== '') {
             const desconto = parseFloat(descontoItemLista.replace(',', '.')) / 100;
@@ -2110,28 +2399,36 @@ class FrenteCaixa extends React.Component {
     };
 
     salvarProdutoLista = () => {
-        const { produtoSelecionadoIndex, quantidadeLista, valorUnitarioLista, descontoItemLista, produtosSelecionados, preco } = this.state;
+        const {
+            produtoSelecionadoIndex,
+            quantidadeLista,
+            valorUnitarioLista,
+            descontoItemLista,
+            produtosSelecionados,
+            produtoSelecionadoLista,
+        } = this.state;
 
         if (produtoSelecionadoIndex !== null && produtoSelecionadoIndex >= 0) {
             const produtosAtualizados = [...produtosSelecionados];
-            let novoPreco = parseFloat(valorUnitarioLista);
-            let precoUnitario;
 
-            if (descontoItemLista > 0) {
-                precoUnitario = novoPreco;
-            } else {
-                precoUnitario = preco;
-            };
+            // Obtém o preço original do produto
+            const precoOriginal = produtoSelecionadoLista.precoUnitario || produtoSelecionadoLista.produto.preco;
 
+            // Converte os valores para números
+            const novoPreco = parseFloat(valorUnitarioLista);
+            const descontoItem = parseFloat(descontoItemLista);
+
+            // Calcula o preço unitário considerando o desconto, se houver
+            const precoUnitario = descontoItem > 0 ? (precoOriginal * (1 - descontoItem / 100)) : novoPreco;
+
+            // Atualiza o produto na lista
             produtosAtualizados[produtoSelecionadoIndex] = {
                 ...produtosAtualizados[produtoSelecionadoIndex],
                 quantidade: quantidadeLista,
                 preco: novoPreco,
                 descontoItem: descontoItemLista,
-                precoUnitario: precoUnitario
+                precoUnitario: precoUnitario.toFixed(2),
             };
-
-            // console.log("PE: ", produtosAtualizados)
 
             this.setState({
                 produtosSelecionados: produtosAtualizados,
@@ -2141,7 +2438,7 @@ class FrenteCaixa extends React.Component {
                 quantidade: '',
                 descontoItem: '',
             });
-        };
+        }
     };
 
     atualizaSubTotalLista = () => {
@@ -2162,73 +2459,63 @@ class FrenteCaixa extends React.Component {
     // --------------------------------------- BOTÃO LEITOR DE CODIGO DE BARRAS ----------------------------------------
     //-----------------------------------------------------------------------------------------------------------------------
 
-    handleSwitchChange = () => {
-        this.setState((prevState) => ({
-            isChecked: !prevState.isChecked
-        }));
-    };
-
     render() {
 
-        //Produto
-        const { produtos, produtoNaoLocalizado, produtoSelecionado, buscaProduto, carregandoProduto, preco, valorTotal, quantidade, desconto, imagem } = this.state;
-        //Contatos
-        const { contatos, contatoNaoLocalizado, vendedorNaoLocalizado, contatoSelecionado, buscaContato, buscaVendedor, vendedorSelecionado, nome, cnpj, rg, ie_rg, tipo, contribuinte, codigo, fantasia, cep, cidade, uf, endereco, numero, complemento, bairro, email, fone, celular, dataNascimento } = this.state;
-        //Calculos
-        const { subTotalGeral, observacoes, observacaointerna, valorDesconto, dinheiroRecebido, troco, frete, condicao, depositoSelecionado, subTotal, dataPrevista, consumidorFinal, prazo, numeroPedido, descontoProduto } = this.state;
-        //Modals
-        const { carregado, erro, validated, primeiroProdutoDesconto, nomeLoja, idLoja, unidadeLoja, cpfValido, cnpjValido } = this.state;
+        //Produto.
+        const { produtos, produtoNaoLocalizado, produtoSelecionado, produtosSelecionados, buscaProduto, preco, quantidade, desconto, imagem, produtoSelecionadoLista, precoBling } = this.state;
+        //Contatos.
+        const { contatos, vendedores, contatoNaoLocalizado, vendedorNaoLocalizado, buscaContato, buscaVendedor, vendedorSelecionado, nome, cnpj, rg, ie_rg, tipo, contribuinte,
+            cep, cidade, uf, endereco, numero, complemento, bairro, email, fone, celular } = this.state;
+        //Calculos.
+        const { valorTotal, subTotalGeral, observacoes, observacaointerna, valorDesconto, dinheiroRecebido, troco, frete, condicao, subTotal, dataPrevista } = this.state;
+        //Modals.
+        const { modalCadastrarCliente, modalEditarProduto, modalFinalizarVendaSemItem, modalFormaPagamento, modalExcluirPedido, modalInserirProduto, modalExcluirProduto, modalCpfValido,
+            modalInserirParcela, modalSalvarPedido, modalSelecionarLoja, modalPedidoExcluido, canvasFinalizarPedido, validated, idLoja, objeto, unidadeLoja, nomeLoja, cpfValido, cnpjValido, dadosCarregados } = this.state;
+        //Listas de preço.
+        const { idLista, listaspreco, descontoInicialProduto, opcaoDescontoItem, valorLista, quantidadeLista, descontoItemLista,
+            opcaoDescontoLista, valorUnitarioLista, subTotalLista, prazo, parcelas, ultimoPedido } = this.state;
+
 
         let quantidadeTotal = 0;
-        for (const produto of this.state.produtosSelecionados) {
+        for (const produto of produtosSelecionados) {
             quantidadeTotal += produto.quantidade;
         }
 
-        if (erro) {
+        if (!dadosCarregados) {
             return (
-                <Modal show={true} onHide={() => window.location.reload()} centered>
-                    <Modal.Header closeButton className="bg-danger text-white">
-                        <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
-                        <Modal.Title>ERRO </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ textAlign: "center" }}>
-                            <p style={{ fontSize: "20px", fontWeight: "bold" }}>Ocorreu um erro:</p>
-                            <p style={{ fontSize: "20px" }}>{erro}</p>
-                        </div>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="dark" onClick={() => window.location.reload()}>
-                            Tentar novamente
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-            );
-        }
-        if (!carregado) {
-            return (
-                <div className="spinner-container">
+                <div className="spinner-container" >
                     <div className="d-flex align-items-center justify-content-center">
-                        <Spinner variant="secondary" animation="border" role="status">
-                            <span className="visually-hidden">Carregando Frente de caixa...</span>
-                        </Spinner>
+                        <div className="custom-loader"></div>
                     </div>
                     <div>
-                        <p>Carregando Frente de caixa...</p>
+                        <div className="text-loading text-white">Carregando Frente de caixa...</div>
                     </div>
                 </div>
             )
         } else {
             return (
                 <Container fluid className="pb-5" >
-                    <Form noValidate validated={this.state.validated} onSubmit={this.validaVenda}>
+                    <Form noValidate validated={validated} onSubmit={this.validaVenda}>
                         <Row className="d-flex">
                             <Col md={6} className="">
                                 <div className="grid-pdv-1">
                                     <div className="mb-3">
-                                        <h5>Vendedor</h5>
+                                        <h5>Vendedor - Loja selecionada: {nomeLoja}</h5>
                                     </div>
                                     <Row className="row align-items-center">
+                                        <Col className="col" xs={4}>
+                                            <Form.Group className="mb-3">
+                                                <Form.Label htmlFor="tipo" className="texto-campos">Lista de preço</Form.Label>
+                                                <Form.Select as="select" id="tipo" className="form-control" name="tipo" value={idLista || ''} onChange={this.selecionaListaDesconto}>
+                                                    <option value="undefined">Selecione uma lista de preço</option>
+                                                    {listaspreco && listaspreco.map(lista => (
+                                                        <option key={lista.idLista} value={lista.idLista}>
+                                                            {lista.nomeLista}
+                                                        </option>
+                                                    ))}
+                                                </Form.Select>
+                                            </Form.Group>
+                                        </Col>
                                         <Col xs={4} >
                                             <Form.Label htmlFor="vendedor" className="texto-campos">Adicionar vendedor</Form.Label>
                                             <Form.Group className="mb-3" >
@@ -2260,7 +2547,7 @@ class FrenteCaixa extends React.Component {
                                             </Row>
                                         )}
                                         {vendedorSelecionado && (
-                                            <Col className="col" xs={3}>
+                                            <Col className="col" xs={4}>
                                                 <Form.Label htmlFor="vendedorSelecionado" className="text-center d-block">Vendedor selecionado</Form.Label>
                                                 <Form.Group className="mb-3">
                                                     <Form.Control type="text" id="vendedorSelecionado" className="form-control text-center" name="vendedorSelecionado" value={vendedorSelecionado.contato.nome || ''} disabled />
@@ -2270,7 +2557,7 @@ class FrenteCaixa extends React.Component {
                                     </Row>
                                     {!vendedorSelecionado && (
                                         <ul className="lista-produtos">
-                                            {this.state.vendedores.map((contato) => (
+                                            {vendedores.map((contato) => (
                                                 <li
                                                     key={contato.contato.id}
                                                     onClick={() => this.selecionarVendedor(contato)}
@@ -2291,38 +2578,46 @@ class FrenteCaixa extends React.Component {
                                         <h5>Produto</h5>
                                     </div>
                                     <Row className="row align-items-center">
-                                        <Col xs={8}>
-                                            <Form.Label htmlFor="produto" className="texto-campos">Adicionar produto</Form.Label>
+                                        <Col xs={10}>
+                                            <Form.Label htmlFor="produto" className="texto-campos">
+                                                Adicionar produto
+                                            </Form.Label>
                                             <Form.Group className="mb-3">
                                                 <InputGroup>
-                                                    <Form.Control type="text" className="form-control" placeholder="Busque um produto pelo (Nome ou Código ou SKU ou EAN ou Descrição/Nome Fornecedor)" value={buscaProduto || ''} onChange={this.atualizarBuscaProduto}
+                                                    <Form.Control
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Busque um produto pelo (Nome ou Código ou SKU ou EAN ou Descrição/Nome Fornecedor)"
+                                                        value={buscaProduto || ''}
+                                                        onChange={this.atualizarBuscaProduto}
                                                         onKeyDown={(e) => {
                                                             if (e.key === 'Enter') {
-                                                                e.preventDefault(); // Evita o comportamento padrão de submit do formulário
+                                                                e.preventDefault();
                                                                 if (buscaProduto) {
-                                                                    this.buscarProdutos(buscaProduto); // Chame a função de busca aqui
+                                                                    this.buscarProdutos(buscaProduto);
                                                                 }
                                                             }
                                                         }}
                                                     />
-                                                    <Button variant="secondary" onClick={() => { if (buscaProduto) { this.buscarProdutos(buscaProduto) } }}>
+                                                    <Button
+                                                        variant="secondary"
+                                                        onClick={() => {
+                                                            if (buscaProduto) {
+                                                                this.buscarProdutos(buscaProduto);
+                                                            }
+                                                        }}
+                                                    >
                                                         <FontAwesomeIcon icon={faSearch} />
                                                     </Button>
                                                 </InputGroup>
                                             </Form.Group>
                                         </Col>
-                                        {/* <Col xs={4}>
-                                            <Form>
-                                                <Form.Label htmlFor="codigoBarras" className="texto-campos">Leitor de código de barras</Form.Label>
-                                                <Form.Check type="switch" id="custom-switch" label={this.state.isChecked ? "Ativado" : "Desativado"} checked={this.state.isChecked} onChange={this.handleSwitchChange} />
-                                            </Form>
-                                        </Col> */}
                                     </Row>
-                                    {produtos.map((produto) => {
-                                        const precoFormatado = parseFloat(produto.produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                                    <ul className="lista-produtos">
+                                        {produtos.map((produto) => {
+                                            const precoFormatado = parseFloat(produto.produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 
-                                        return (
-                                            <ul className="lista-produtos">
+                                            return (
                                                 <li
                                                     key={produto.produto.id}
                                                     onClick={() => this.selecionarProduto(produto)}
@@ -2336,10 +2631,9 @@ class FrenteCaixa extends React.Component {
                                                 >
                                                     Cód: {produto.produto.codigo} Produto: {produto.produto.descricao} - Preço R$ {precoFormatado}
                                                 </li>
-                                            </ul>
-                                        );
-                                    })}
-
+                                            );
+                                        })}
+                                    </ul>
                                     {produtoNaoLocalizado && (
                                         <Row className="row align-items-center">
                                             <Col className="col" xs={4}>
@@ -2352,36 +2646,84 @@ class FrenteCaixa extends React.Component {
                                     )}
                                     {produtoSelecionado && (
                                         <div className="produto-selecionado">
-                                            <h2>Produto selecionado: {produtoSelecionado.produto.codigo} - {produtoSelecionado.produto.descricao}</h2>
-                                            <Row className="row">
-                                                <Col className="col">
-                                                    <Form.Group className="mb-3">
-                                                        <Row>
-                                                            <Col>
-                                                                {imagem ? (
-                                                                    <Image src={imagem} className="imagem-preview" style={{ width: '171px', height: '180px' }} rounded />
+                                            <div className="d-flex justify-content-end mb-2">
+                                                <CloseButton
+                                                    onClick={() => this.setState({ produtoSelecionado: null })}
+                                                    className="close-button"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Row className="row">
+                                                    <Col className="col">
+                                                        <Form.Group className="mb-3">
+                                                            <Row>
+                                                                <Col>
+                                                                    {imagem ? (
+                                                                        <Zoom
+                                                                            overlayBgColorEnd="rgba(255, 255, 255, 0.95)"
+                                                                            zoomMargin={40}
+                                                                            position="fixed"  // Defina a posição como 'fixed'
+                                                                            style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}  // Centralize na tela
+                                                                        >
+                                                                            <img
+                                                                                alt="Imagem"
+                                                                                src={imagem}
+                                                                                className="imagem-preview com-borda img-responsive rounded"
+                                                                                style={{ width: '390px', height: '264px', maxHeight: '230px' }}
+                                                                            />
+
+                                                                        </Zoom>
+                                                                    ) : (
+                                                                        <Image
+                                                                            src="https://www.bling.com.br/images/imagePdv.svg"
+                                                                            className="imagem-preview com-borda img-responsive"
+                                                                            style={{ width: '390px', height: '264px', maxHeight: '230px' }}
+                                                                            rounded
+                                                                        />
+                                                                    )}
+                                                                </Col>
+                                                            </Row>
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col>
+                                                        <Col>
+                                                            <div className="position-relative product-details">
+                                                                <h2>{produtoSelecionado.produto.codigo} - {produtoSelecionado.produto.descricao}</h2>
+                                                                {this.produtoEstaNaListaDeDesconto(produtoSelecionado) ? (
+                                                                    <>
+                                                                        <div className="d-flex justify-content-between align-items-center">
+                                                                            <span className="strike-through">Preço no Bling: R$ {parseFloat(precoBling).toFixed(2).replace('.', ',')}</span>
+                                                                            <span className="discount-message">Este produto está na lista de desconto.</span>
+                                                                        </div>
+                                                                        <div className="price-container">Valor da lista aplicado:
+                                                                            <h2 className="total-price">{parseFloat(preco).toFixed(2).replace('.', ',')}</h2>
+                                                                        </div>
+                                                                    </>
                                                                 ) : (
-                                                                    <Image src="https://www.bling.com.br/images/imagePdv.svg" className="imagem-preview" style={{ width: '171px', height: '180px' }} rounded />
-                                                                )}
-                                                            </Col>
-                                                        </Row>
-                                                    </Form.Group>
-                                                </Col>
+                                                                    <>
+                                                                        <div className="d-flex justify-content-between align-items-center">
+                                                                            <span className="strike-through">&nbsp;</span>
+                                                                            <span className="discount-message">&nbsp;</span>
+                                                                        </div>
+                                                                        <div className="price-container">Preço unitario:
+                                                                            <h2 className="total-price">{parseFloat(preco).toFixed(2).replace('.', ',')}</h2>
+                                                                        </div>
+                                                                    </>)}
+                                                            </div>
+                                                        </Col>
+                                                    </Col>
+                                                </Row>
+                                            </div>
+                                            <Row className="row align-items-center">
                                                 <Col className="col">
                                                     <Form.Group className="mb-3">
                                                         <Form.Label htmlFor="quantidade" className="texto-campos">Quantidade</Form.Label>
                                                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                            {/* <Button variant="outline-success rounded-0" type="button" onClick={this.decrementarQuantidade} disabled={!produtoSelecionado}>
-                                                                        -
-                                                                    </Button> */}
                                                             <Form.Control type="text" id="quantidade" className="form-control" name="quantidade" value={quantidade || ''} onChange={this.atualizaQuantidade} disabled={!produtoSelecionado} />
-                                                            {/* <Button variant="outline-success rounded-0" type="button" onClick={this.incrementarQuantidade} disabled={!produtoSelecionado}>
-                                                                        +
-                                                                    </Button> */}
                                                         </div>
                                                     </Form.Group>
                                                 </Col>
-                                                <Col className="col" >
+                                                <Col className="col">
                                                     <Form.Group className="mb-3">
                                                         <Form.Label htmlFor="desconto" className="texto-campos">
                                                             Desconto preço (%)
@@ -2392,23 +2734,25 @@ class FrenteCaixa extends React.Component {
                                                             className="form-control"
                                                             name="desconto"
                                                             placeholder="0.00"
-                                                            value={this.state.descontoInicialProduto || ''}
+                                                            value={descontoInicialProduto || ''}
                                                             onChange={this.atualizaDescontoProduto}
-                                                            disabled={this.state.opcaoDescontoItem === 'desliga'}
+                                                            disabled={opcaoDescontoItem === 'desliga'}
                                                         />
-                                                        <Form.Check
-                                                            type="switch"
-                                                            id="ligaSwitch"
-                                                            label={this.state.opcaoDescontoItem === 'liga' ? 'Habilitado' : 'Desabilitado'}
-                                                            checked={this.state.opcaoDescontoItem === 'liga'}
-                                                            onChange={(e) => this.setState({ opcaoDescontoItem: e.target.checked ? 'liga' : 'desliga' })}
-                                                        />
+                                                        {!this.produtoEstaNaListaDeDesconto(produtoSelecionado) && (
+                                                            <Form.Check
+                                                                type="switch"
+                                                                id="ligaSwitch"
+                                                                label={opcaoDescontoItem === 'liga' ? 'Habilitado' : 'Desabilitado'}
+                                                                checked={opcaoDescontoItem === 'liga'}
+                                                                onChange={(e) => this.setState({ opcaoDescontoItem: e.target.checked ? 'liga' : 'desliga' })}
+                                                            />
+                                                        )}
                                                     </Form.Group>
                                                 </Col>
                                                 <Col className="col">
                                                     <Form.Group className="mb-3">
                                                         <Form.Label htmlFor="preco" className="texto-campos">Preço unitário</Form.Label>
-                                                        <Form.Control type="number" id="preco" className="form-control no-spinners" name="preco" placeholder="00,00" value={preco || ''} onChange={this.atualizaPreco} onBlur={this.formatarPreco} readOnly={this.state.descontoInicialProduto !== ''}
+                                                        <Form.Control type="number" id="preco" className="form-control no-spinners" name="preco" placeholder="00,00" value={preco || ''} onChange={this.atualizaPreco} onBlur={this.formatarPreco} readOnly={descontoInicialProduto !== ''}
                                                         />
                                                     </Form.Group>
                                                 </Col>
@@ -2418,69 +2762,103 @@ class FrenteCaixa extends React.Component {
                                                         <Form.Control type="text" id="valorTotal" className="form-control" name="valorTotal" placeholder="00,00" value={valorTotal ? valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 }).replace('.', ',') : ''} onChange={this.atualizarValorTotal} readOnly />
                                                     </Form.Group>
                                                 </Col>
+                                                <div>
+                                                    <div className="text-end">
+                                                        <Button variant="secondary" onClick={() => this.adicionarProdutoSelecionado(produtoSelecionado)}>
+                                                            <BsListCheck style={{ marginRight: '0.5rem' }} />
+                                                            Inserir produto
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             </Row>
-                                            <div className="text-end">
-                                                <Button variant="secondary" onClick={() => this.adicionarProdutoSelecionado(produtoSelecionado)}>
-                                                    <BsListCheck style={{ marginRight: '0.5rem' }} />
-                                                    Inserir produto
-                                                </Button>
-                                            </div>
                                         </div>
                                     )}
 
                                     <div className="divisa"></div>
-                                    <Table responsive="lg" className="table table-sm table-transparent" >
-                                        <thead>
-                                            <tr>
-                                                <th>Produto</th>
-                                                <th>Quantidade</th>
-                                                <th>Preço</th>
-                                                <th>Subtotal</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {this.state.produtosSelecionados.map((produto, index) => (
-                                                <tr key={produto.produto.id}>
-                                                    <td>{produto.produto.codigo} - {produto.produto.descricao}</td>
-                                                    <td>{produto.quantidade}</td>
-                                                    <td>R$ {typeof produto.preco === "number"
-                                                        ? produto.preco.toFixed(2).replace('.', ',')
-                                                        : parseFloat(produto.preco).toFixed(2).replace('.', ',')}</td>
-                                                    <td>R$ {this.calcularSubTotal(produto.produto, produto.quantidade, produto.preco).toFixed(2).replace('.', ',')}</td>
-                                                    <td>
-                                                        <Button variant="light" title="Editar produto" className="transparent-button" onClick={() => {
-                                                            this.modalEditarProduto(produto)
-                                                        }}>
-                                                            <BsPencilSquare className="blue-icon" />
-                                                        </Button>
-                                                        <Button variant="light" title="Excluir produto" className="transparent-button" onClick={this.modalExcluirProduto}>
-                                                            <BsTrashFill className="red-icon" />
-                                                        </Button>
-                                                    </td>
+                                    <div className="table-container-produto">
+                                        <Table responsive="lg" className="table table-sm table-transparent" >
+                                            <thead>
+                                                <tr>
+                                                    <th>Produto</th>
+                                                    <th>Quantidade</th>
+                                                    <th>Preço</th>
+                                                    <th>Subtotal</th>
+                                                    <th>Ações</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </Table>
+                                            </thead>
+                                            <tbody>
+                                                {produtosSelecionados.map((produto, index) => (
+                                                    <tr key={produto.produto.id}>
+                                                        <td>{produto.produto.codigo} - {produto.produto.descricao}</td>
+                                                        <td>{produto.quantidade}</td>
+                                                        <td style={{ alignItems: 'center' }}>
+                                                            {this.produtoEstaNaListaDeDesconto(produto) && (
+                                                                <div style={{ alignItems: 'center' }}>
+                                                                    <BsArrowDown style={{ color: 'red', flexShrink: 0, marginRight: '5px' }} />
+                                                                    <span style={{ color: 'red' }}>
+                                                                        R$ {typeof produto.preco === "number"
+                                                                            ? produto.preco.toFixed(2).replace('.', ',')
+                                                                            : parseFloat(produto.preco).toFixed(2).replace('.', ',')}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            {!this.produtoEstaNaListaDeDesconto(produto) && (
+                                                                <span>
+                                                                    R$ {typeof produto.preco === "number"
+                                                                        ? produto.preco.toFixed(2).replace('.', ',')
+                                                                        : parseFloat(produto.preco).toFixed(2).replace('.', ',')}
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td style={{ alignItems: 'center' }}>
+                                                            {this.produtoEstaNaListaDeDesconto(produto) && (
+                                                                <div style={{ alignItems: 'center' }}>
+                                                                    <BsArrowDown style={{ color: 'red', flexShrink: 0, marginRight: '5px' }} />
+                                                                    <span style={{ color: 'red' }}>
+                                                                        R$ {this.calcularSubTotal(produto.produto, produto.quantidade, produto.preco).toFixed(2).replace('.', ',')}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            {!this.produtoEstaNaListaDeDesconto(produto) && (
+                                                                <span>
+                                                                    R$ {this.calcularSubTotal(produto.produto, produto.quantidade, produto.preco).toFixed(2).replace('.', ',')}
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            <Button variant="light" title="Editar produto" className="transparent-button" onClick={() => {
+                                                                this.modalEditarProduto(produto)
+                                                            }}>
+                                                                <BsPencilSquare className="blue-icon" />
+                                                            </Button>
+                                                            <Button variant="light" title="Excluir produto" className="transparent-button" onClick={this.modalExcluirProduto}>
+                                                                <BsTrashFill className="red-icon" />
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </Table>
+                                    </div>
 
-                                    <Modal show={this.state.modalEditarProduto} onHide={this.fecharModalEditarProduto} size="lg" centered>
+                                    <Modal show={modalEditarProduto} onHide={this.fecharModalEditarProduto} size="lg" centered>
                                         <Modal.Header closeButton className="">
                                             <Modal.Title>Editar</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body style={{ padding: '20px' }}>
-                                            {this.state.produtoSelecionadoLista && (
+                                            {produtoSelecionadoLista && (
                                                 <div>
                                                     <Row className="row">
                                                         <Col className="col" xs={4}>
                                                             <Form.Group className="mb-3">
                                                                 <Form.Label htmlFor="valorLista" className="texto-campos">Valor de lista</Form.Label>
-                                                                <Form.Control type="number" id="valorLista" className="form-control no-spinners" name="valorLista" value={this.state.valorLista || ''} disabled />
+                                                                <Form.Control type="number" id="valorLista" className="form-control no-spinners" name="valorLista" value={valorLista || ''} disabled />
                                                             </Form.Group>
                                                         </Col>
                                                         <Col className="col" xs={4}>
                                                             <Form.Group className="mb-3">
                                                                 <Form.Label htmlFor="quantidade" className="texto-campos">Quantidade</Form.Label>
-                                                                <Form.Control type="number" id="quantidade" className="form-control no-spinners" name="quantidade" value={this.state.quantidadeLista || ''} onChange={this.atualizaQuantidadeLista} />
+                                                                <Form.Control type="number" id="quantidade" className="form-control no-spinners" name="quantidade" value={quantidadeLista || ''} onChange={this.atualizaQuantidadeLista} />
                                                             </Form.Group>
                                                         </Col>
                                                         <Col className="col" xs={4}>
@@ -2492,22 +2870,20 @@ class FrenteCaixa extends React.Component {
                                                                     className="form-control no-spinners"
                                                                     name="descontoItem"
                                                                     placeholder="00,00"
-                                                                    value={this.state.descontoItemLista === '0' ? '' : this.state.descontoItemLista}
+                                                                    value={descontoItemLista === '0' ? '' : descontoItemLista}
                                                                     onChange={this.atualizaDescontoItem}
                                                                     onBlur={this.aplicaDescontoItem}
-                                                                    disabled={this.state.opcaoDescontoLista === 'desliga'}
+                                                                    disabled={opcaoDescontoLista === 'desliga' || this.produtoEstaNaListaDeDesconto(produtoSelecionadoLista)}
                                                                 />
-                                                                <Form.Check
-                                                                    type="switch"
-                                                                    id="ligaSwitch"
-                                                                    label={this.state.opcaoDescontoLista === 'liga' ? 'Habilitado' : 'Desabilitado'}
-                                                                    checked={this.state.opcaoDescontoLista === 'liga'}
-                                                                    onChange={(e) => this.setState({ opcaoDescontoLista: e.target.checked ? 'liga' : 'desliga' })}
-                                                                // disabled={this.state.produtoSelecionadoLista.possuiDesconto === true}
-                                                                />
-                                                                {/* {this.state.produtoSelecionadoLista.possuiDesconto === true && (
-                                                                    <p className="text-muted text-center texto-desconto">O Produto possui desconto</p>
-                                                                )} */}
+                                                                {!this.produtoEstaNaListaDeDesconto(produtoSelecionadoLista) && (
+                                                                    <Form.Check
+                                                                        type="switch"
+                                                                        id="ligaSwitch"
+                                                                        label={opcaoDescontoLista === 'liga' ? 'Habilitado' : 'Desabilitado'}
+                                                                        checked={opcaoDescontoLista === 'liga'}
+                                                                        onChange={(e) => this.setState({ opcaoDescontoLista: e.target.checked ? 'liga' : 'desliga' })}
+                                                                    />
+                                                                )}
                                                             </Form.Group>
                                                         </Col>
                                                     </Row>
@@ -2515,13 +2891,13 @@ class FrenteCaixa extends React.Component {
                                                         <Col className="col" xs={4}>
                                                             <Form.Group className="mb-3">
                                                                 <Form.Label htmlFor="valorUnitario" className="texto-campos">Valor unitário</Form.Label>
-                                                                <Form.Control type="number" id="valorUnitario" className="form-control no-spinners" name="valorUnitario" value={this.state.valorUnitarioLista || ''} onChange={this.atualizaValorUnitario} onBlur={this.formatarPrecoLista} />
+                                                                <Form.Control type="number" id="valorUnitario" className="form-control no-spinners" name="valorUnitario" value={valorUnitarioLista || ''} onChange={this.atualizaValorUnitario} onBlur={this.formatarPrecoLista} />
                                                             </Form.Group>
                                                         </Col>
                                                         <Col className="col" xs={4}>
                                                             <Form.Group className="mb-3">
                                                                 <Form.Label htmlFor="subTotalLista" className="texto-campos">Sub total</Form.Label>
-                                                                <Form.Control type="number" id="subTotalLista" className="form-control no-spinners" name="subTotalLista" value={this.state.subTotalLista || ''} disabled />
+                                                                <Form.Control type="number" id="subTotalLista" className="form-control no-spinners" name="subTotalLista" value={subTotalLista || ''} disabled />
                                                             </Form.Group>
                                                         </Col>
                                                     </Row>
@@ -2555,6 +2931,20 @@ class FrenteCaixa extends React.Component {
                                                 <Form.Control type="text" id="totaldavenda" className="form-control" name="totaldavenda" placeholder="00,00" defaultValue={subTotalGeral ? subTotalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 }).replace('.', ',') : ''} disabled />
                                             </Form.Group>
                                         </Col>
+                                        <Row className="row align-items-center">
+                                            <Col className="col" xs={3}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label htmlFor="desconto" className="texto-campos">Valor fora lista (Total)</Form.Label>
+                                                    <Form.Control type="text" className="form-control no-spinners" name="desconto" placeholder="00,00" value={this.calcularTotalLista().totalForaDesconto.toFixed(2).replace('.', ',')} disabled />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col className="col" xs={3}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label htmlFor="desconto" className="texto-campos">Valor lista de desconto (Total)</Form.Label>
+                                                    <Form.Control type="text" className="form-control no-spinners" name="desconto" placeholder="00,00" value={this.calcularTotalLista().totalNaListaDesconto.toFixed(2).replace('.', ',')} disabled />
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
                                     </Row>
                                 </div>
                             </Col>
@@ -2579,7 +2969,6 @@ class FrenteCaixa extends React.Component {
                                                                 Cliente (Nome) <BsInfoCircle className="icon-info" />
                                                             </Form.Label>
                                                         </OverlayTrigger>
-
                                                         <InputGroup>
                                                             <Form.Control required type="text" className="form-control" placeholder="Digite o nome do cliente" value={buscaContato || nome} onChange={this.atualizarBuscaContato}
                                                                 onKeyDown={(e) => {
@@ -2622,9 +3011,8 @@ class FrenteCaixa extends React.Component {
                                             </Col>
                                         </Row>
                                         {contatos.map((contato) => (
-                                            <ul className="lista-contatos">
+                                            <ul key={contato.contato.id} className="lista-contatos">
                                                 <li
-                                                    key={contato.contato.id}
                                                     onClick={() => this.selecionarContato(contato)}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter' || e.key === ' ') {
@@ -2638,9 +3026,10 @@ class FrenteCaixa extends React.Component {
                                                 </li>
                                             </ul>
                                         ))}
+
                                         <Row>
                                             <Col className="col" xs={12} md={4}>
-                                                <Button variant="secondary" onClick={this.ModalCadastrarCliente} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center' }}>
+                                                <Button variant="secondary" onClick={this.modalCadastrarCliente} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center' }}>
                                                     <BsPersonAdd style={{ marginRight: '0.5rem' }} />
                                                     Cadastrar cliente
                                                 </Button>
@@ -2657,7 +3046,7 @@ class FrenteCaixa extends React.Component {
                                             </Col>
                                         </Row>
 
-                                        <Modal show={this.state.ModalCadastrarCliente} onHide={this.ModalCadastrarCliente} size="xl" centered>
+                                        <Modal show={modalCadastrarCliente} onHide={this.modalCadastrarCliente} size="xl" centered>
                                             <Modal.Header closeButton className="bg-secondary text-white">
                                                 <BsPersonAdd className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                                                 <Modal.Title>Cadastrar cliente</Modal.Title>
@@ -2745,7 +3134,7 @@ class FrenteCaixa extends React.Component {
                                                     <Col className="col" xs={12} md={4}>
                                                         <Form.Group className="mb-3">
                                                             <Form.Label htmlFor="uf" className="texto-campos">UF</Form.Label>
-                                                            <Form.Select as="select" id="uf" className="form-control" name="uf" value={this.state.uf} onChange={this.atualizaUf}>
+                                                            <Form.Select as="select" id="uf" className="form-control" name="uf" value={uf} onChange={this.atualizaUf}>
                                                                 <option value="">Selecione</option>
                                                                 <option value="AC">Acre</option>
                                                                 <option value="AL">Alagoas</option>
@@ -2828,8 +3217,8 @@ class FrenteCaixa extends React.Component {
                                                 </Row>
                                             </Modal.Body>
                                             <Modal.Footer>
-                                                <Button variant="outline-secondary" onClick={this.ModalCadastrarCliente}>Fechar</Button>
-                                                <Button variant="secondary" onClick={this.ModalCadastrarCliente}>Salvar</Button>
+                                                <Button variant="outline-secondary" onClick={this.modalCadastrarCliente}>Fechar</Button>
+                                                <Button variant="secondary" onClick={this.modalCadastrarCliente}>Salvar</Button>
                                             </Modal.Footer>
                                         </Modal>
                                     </div>
@@ -2837,14 +3226,7 @@ class FrenteCaixa extends React.Component {
                                     <div className="mb-3">
                                         <h5>Outras informações</h5>
                                     </div>
-                                    {/* <Row className="row">
-                                            <Col className="col">
-                                                <Form.Group className="mb-3">
-                                                    <Form.Label htmlFor="dataprevista" className="texto-campos">Data prevista</Form.Label>
-                                                    <DatePicker locale={ptBR} id="dataprevista" name="dataprevista" selected={dataPrevista} onChange={this.atualizaDataPrevista} placeholderText="Selecione uma data" className="form-select" dateFormat="dd/MM/yyyy" />
-                                                </Form.Group>
-                                            </Col>
-                                            <Col className="col">
+                                    {/* <Col className="col">
                                                 <Form.Group className="mb-3">
                                                     <Form.Label htmlFor="depositolancamento" className="texto-campos">Depósito para lançamento</Form.Label>
                                                     <Form.Select className="" id="depositolancamento" name="depositolancamento" value={depositoSelecionado || ''} onChange={this.atualizaDepositoSelecionado} >
@@ -2856,8 +3238,7 @@ class FrenteCaixa extends React.Component {
                                                         ))}
                                                     </Form.Select>
                                                 </Form.Group>
-                                            </Col>
-                                        </Row> */}
+                                        </Col> */}
                                     <div>
                                         <Row className="row align-items-center">
                                             <Col className="col" xs={3}>
@@ -2870,6 +3251,12 @@ class FrenteCaixa extends React.Component {
                                                 <Form.Group className="mb-3">
                                                     <Form.Label htmlFor="totaldavenda" className="texto-campos">Total da venda</Form.Label>
                                                     <Form.Control type="text" id="totaldavenda" className="form-control" name="totaldavenda" placeholder="00,00" defaultValue={subTotalGeral ? subTotalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 }).replace('.', ',') : ''} disabled />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col className="col" xs={3}>
+                                                <Form.Group controlId="dataprevista" className="mb-3">
+                                                    <Form.Label>Data prevista</Form.Label>
+                                                    <Form.Control type="text" placeholder="Digite a data prevista" value={dataPrevista || ''} onChange={this.atualizaDataPrevista} />
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -2953,15 +3340,29 @@ class FrenteCaixa extends React.Component {
                                                         Condição <BsInfoCircle className="icon-info" />
                                                     </Form.Label>
                                                 </OverlayTrigger>
-                                                <Form.Control type="text" className="form-control" name="trocodinheiro" value={this.state.prazo || ''} onChange={this.handleChangePrazo} />
+                                                <Form.Control
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="trocodinheiro"
+                                                    value={prazo || ''}
+                                                    onChange={this.handleChangePrazo}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            this.adicionarParcela();
+                                                        }
+                                                    }}
+                                                />
                                             </Form.Group>
                                         </Col>
                                         <Col className="col mb-3" >
                                             <Form.Group className="mb-3">
                                                 <Form.Label htmlFor="gerarparcelas" className="texto-campos" style={{ marginRight: '20px' }}></Form.Label>
-                                                <Button variant="secondary" className="form-control"
+                                                <Button
+                                                    variant="secondary"
+                                                    className="form-control"
                                                     onClick={() => {
-                                                        if (this.state.subTotalGeral === '0.00') {
+                                                        if (subTotalGeral === '0.00') {
                                                             this.modalInserirParcela();
                                                         } else {
                                                             this.adicionarParcela();
@@ -2974,7 +3375,7 @@ class FrenteCaixa extends React.Component {
                                                 </Button>
                                             </Form.Group>
                                         </Col>
-                                        <div>
+                                        <div className="table-container-produto">
                                             <Table responsive="lg" className="table table-sm" striped>
                                                 <thead>
                                                     <tr>
@@ -2987,7 +3388,7 @@ class FrenteCaixa extends React.Component {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {this.state.parcelas.map((parcela, index) => (
+                                                    {parcelas.map((parcela, index) => (
                                                         <tr key={index}>
                                                             <td>
                                                                 <Col>
@@ -3062,7 +3463,7 @@ class FrenteCaixa extends React.Component {
                                         <div className="d-flex justify-content-between">
                                             <div className="botao-excluirvenda">
                                                 <div>
-                                                    <Button variant="secondary" onClick={this.ModalExcluirPedido}>Excluir pedido</Button>
+                                                    <Button variant="secondary" onClick={this.modalExcluirPedido}>Excluir pedido</Button>
                                                 </div>
                                             </div>
                                             <div className="botao-finalizarvenda">
@@ -3083,7 +3484,7 @@ class FrenteCaixa extends React.Component {
 
                     {/* ---------------------------------------------------------- MODALS ---------------------------------------------------------- */}
 
-                    <Modal show={this.state.ModalFinalizarVendaSemItem} onHide={this.ModalFinalizarVendaSemItem} centered>
+                    <Modal show={modalFinalizarVendaSemItem} onHide={this.modalFinalizarVendaSemItem} centered>
                         <Modal.Header closeButton className="bg-warning text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Modal.Title>Atenção </Modal.Title>
@@ -3092,11 +3493,11 @@ class FrenteCaixa extends React.Component {
                             Este pedido não possui itens ou cliente, insira-os para realizar essa operação.
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={this.ModalFinalizarVendaSemItem}>Fechar</Button>
+                            <Button variant="secondary" onClick={this.modalFinalizarVendaSemItem}>Fechar</Button>
                         </Modal.Footer>
                     </Modal>
 
-                    <Modal show={this.state.ModalFormaPagamento} onHide={this.ModalFormaPagamento} centered>
+                    <Modal show={modalFormaPagamento} onHide={this.modalFormaPagamento} centered>
                         <Modal.Header closeButton className="bg-warning text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Modal.Title>Atenção </Modal.Title>
@@ -3105,26 +3506,32 @@ class FrenteCaixa extends React.Component {
                             Insira a forma de pagamento antes de finalizar a compra.
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={this.ModalFormaPagamento}>Fechar</Button>
+                            <Button variant="secondary" onClick={this.modalFormaPagamento}>Fechar</Button>
                         </Modal.Footer>
                     </Modal>
 
-                    <Modal show={this.state.ModalExcluirPedido} onHide={this.ModalExcluirPedido} centered>
+                    <Modal show={modalExcluirPedido} onHide={this.modalExcluirPedido} centered>
                         <Modal.Header closeButton className="bg-warning text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Modal.Title>Atenção </Modal.Title>
                         </Modal.Header>
                         <Modal.Body style={{ padding: '20px' }}>
-                            <div>Deseja excluir o pedido {/* {this.state.ultimoPedido}? */}</div>
+                            <div>Deseja excluir o pedido</div>
                             <div>Essa ação não poderá ser desfeita.</div>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="outline-secondary" onClick={this.ModalExcluirPedido}>Não</Button>
+                            <Button variant="outline-secondary" onClick={this.modalExcluirPedido}>Não</Button>
                             <Button variant="secondary" onClick={this.excluirPedido}>Sim</Button>
                         </Modal.Footer>
                     </Modal>
 
-                    <Modal show={this.state.modalInserirProduto} onHide={this.modalInserirProduto} centered>
+                    <Modal show={modalPedidoExcluido} onHide={this.modalPedidoExcluido} centered>
+                        <Modal.Body style={{ padding: '20px' }}>
+                            <span style={{ display: 'block' }}><strong>Excluindo pedido...</strong></span>
+                        </Modal.Body>
+                    </Modal>
+
+                    <Modal show={modalInserirProduto} onHide={this.modalInserirProduto} centered>
                         <Modal.Header closeButton className="bg-warning text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Modal.Title>Atenção </Modal.Title>
@@ -3137,7 +3544,7 @@ class FrenteCaixa extends React.Component {
                         </Modal.Footer>
                     </Modal>
 
-                    <Modal show={this.state.ModalExcluirProduto} onHide={this.modalExcluirProduto} centered>
+                    <Modal show={modalExcluirProduto} onHide={this.modalExcluirProduto} centered>
                         <Modal.Header closeButton className="bg-warning text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Modal.Title>Atenção </Modal.Title>
@@ -3151,7 +3558,7 @@ class FrenteCaixa extends React.Component {
                         </Modal.Footer>
                     </Modal>
 
-                    <Modal show={this.state.ModalCpfValido} onHide={this.ModalCpfValido} centered>
+                    <Modal show={modalCpfValido} onHide={this.modalCpfValido} centered>
                         <Modal.Header closeButton className="bg-danger text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Modal.Title>Atenção</Modal.Title>
@@ -3160,11 +3567,11 @@ class FrenteCaixa extends React.Component {
                             CPF | CNPJ inválido. Corrija o campo antes de finalizar a venda.
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button className="botao-finalizarvenda" variant="secondary" onClick={this.ModalCpfValido}>Fechar</Button>
+                            <Button className="botao-finalizarvenda" variant="secondary" onClick={this.modalCpfValido}>Fechar</Button>
                         </Modal.Footer>
                     </Modal>
 
-                    <Offcanvas show={this.state.canvasFinalizarPedido} onHide={this.canvasFinalizarPedido} size="lg" placement="end" style={{ width: '35%' }}>
+                    <Offcanvas show={canvasFinalizarPedido} onHide={this.canvasFinalizarPedido} size="lg" placement="end" style={{ width: '35%' }}>
                         <Offcanvas.Header closeButton className="bg-secondary text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Offcanvas.Title>Resumo do pedido</Offcanvas.Title>
@@ -3195,7 +3602,7 @@ class FrenteCaixa extends React.Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {this.state.produtosSelecionados.map((produto, index) => (
+                                    {produtosSelecionados.map((produto, index) => (
                                         <tr key={produto.produto.id}>
                                             <td>{produto.produto.codigo} - {produto.produto.descricao}</td>
                                             <td>{produto.quantidade}</td>
@@ -3284,7 +3691,7 @@ class FrenteCaixa extends React.Component {
                         </Offcanvas.Body>
                     </Offcanvas>
 
-                    <Modal show={this.state.modalInserirParcela} onHide={this.modalInserirParcela} centered>
+                    <Modal show={modalInserirParcela} onHide={this.modalInserirParcela} centered>
                         <Modal.Header closeButton className="bg-warning text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Modal.Title>Atenção </Modal.Title>
@@ -3296,14 +3703,14 @@ class FrenteCaixa extends React.Component {
                             <Button variant="secondary" onClick={this.modalInserirParcela}>Fechar</Button>
                         </Modal.Footer>
                     </Modal>
-                    <Modal show={this.state.modalSalvarPedido} onHide={this.modalSalvarPedido} centered>
+                    <Modal show={modalSalvarPedido} onHide={this.modalSalvarPedido} centered>
                         <Modal.Body>
-                            <span style={{ display: 'block' }} ><strong>Pedido N.º: {this.state.ultimoPedido} </strong></span>
+                            <span style={{ display: 'block' }} ><strong>Pedido N.º: {ultimoPedido} </strong></span>
                             <span style={{ display: 'block' }}><strong>Salvo com sucesso!</strong></span>
                         </Modal.Body>
                     </Modal>
 
-                    <Modal show={this.state.ModalSelecionarLoja} onHide={this.ModalSelecionarLoja} backdrop="static" centered>
+                    <Modal show={modalSelecionarLoja} onHide={this.modalSelecionarLoja} backdrop="static" centered>
                         <Modal.Header closeButton className="bg-secondary text-white">
                             <BsShieldFillExclamation className="mr-2 fa-2x" style={{ marginRight: '10px' }} />
                             <Modal.Title>Selecione uma loja </Modal.Title>
@@ -3315,586 +3722,39 @@ class FrenteCaixa extends React.Component {
                             <Col className="col">
                                 <Form.Group className="mb-3">
                                     <Form.Label htmlFor="depositolancamento" className="texto-campos">Selecione a loja</Form.Label>
-                                    <Form.Select as="select" className="form-control" id="depositolancamento" name="depositolancamento" value={idLoja || ''} onChange={this.atualizaNomeLoja}>
-                                        <option key={0} value={0}>Selecione a loja</option>
-                                        {this.state.objeto && this.state.objeto.map((objeto) => (
-                                            <option key={objeto.idLoja} value={objeto.idLoja}>
+                                    <Form.Select as="select" className="form-control" id="depositolancamento" name="depositolancamento" value={idLoja !== null ? idLoja.toString() : ''} onChange={this.atualizaIdLoja}>
+                                        <option value="">Selecione a loja</option>
+                                        {objeto && objeto.map((objeto) => (
+                                            <option key={objeto.idLoja} value={objeto.idLoja.toString()}>
                                                 {objeto.nomeLoja}
                                             </option>
                                         ))}
-                                        {/* PALIATIVO */}
-                                        <option value="204607447">Loja - Araucaria</option>
-                                        <option value="204607448">Loja - Londrina</option>
-                                        <option value="204607449">Loja - Curitiba</option>
                                     </Form.Select>
                                 </Form.Group>
                             </Col>
                             <Col className="col">
                                 <Form.Group className="mb-3">
                                     <Form.Label htmlFor="unidadenegocio" className="texto-campos">Unidade de negócio</Form.Label>
-                                    <Form.Select as="select" className="form-control" id="unidadenegocio" name="unidadenegocio" value={this.state.unidadeLoja} onChange={this.atualizaUnidadeNegocio} >
-                                        {this.state.objeto && this.state.objeto.map((objeto) => (
-                                            <option key={objeto.idLoja} value={objeto.unidadeLoja}>
+                                    <Form.Select as="select" className="form-control" id="unidadenegocio" name="unidadenegocio" value={unidadeLoja !== null ? unidadeLoja.toString() : ''} onChange={this.atualizaUnidadeNegocio}>
+                                        <option value="">Selecione a unidade de negócio</option>
+                                        {objeto && objeto.map((objeto) => (
+                                            <option key={objeto.idLoja} value={objeto.unidadeLoja.toString()}>
                                                 {objeto.unidadeLoja}
                                             </option>
                                         ))}
-                                        {/* PALIATIVO */}
-                                        <option value="204607447">Matriz</option>
-                                        <option value="204607448">Filial</option>
-                                        <option value="204607449">Filial</option>
                                     </Form.Select>
                                 </Form.Group>
                             </Col>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={this.ModalSelecionarLoja}>Salvar</Button>
+                            <Button variant="secondary" onClick={this.modalSelecionarLoja}>Salvar</Button>
                         </Modal.Footer>
                     </Modal>
                 </Container >
             );
         }
     }
-
-    // -------------------------------------------- CHAMADAS API VERSÕES ANTERIORES --------------------------------------------
-
-    // buscarProdutos = (value) => {
-    //     // console.log("Buscando produto por:", value);
-    //     this.setState({ buscaProduto: value, carregando: false });
-    //     fetch(`http://localhost:8081/api/v1/produtos`)
-    //         .then((resposta) => {
-    //             if (!resposta.ok) {
-    //                 throw new Error('Erro na chamada da API');
-    //             }
-    //             return resposta.json();
-    //         })
-    //         .then((dados) => {
-    //             if (dados.retorno.produtos) {
-    //                 const produtosFiltrados = dados.retorno.produtos.filter(
-    //                     (produto) =>
-    //                         (produto.produto.descricao && produto.produto.descricao.toLowerCase().includes(value.toLowerCase())) ||
-    //                         (produto.produto.codigo && produto.produto.codigo.toLowerCase().includes(value.toLowerCase())) ||
-    //                         (produto.produto.gtin && produto.produto.gtin.toLowerCase().includes(value.toLowerCase())) ||
-    //                         (produto.produto.gtinEmbalagem && produto.produto.gtinEmbalagem.toLowerCase().includes(value.toLowerCase())) ||
-    //                         (produto.produto.descricaoFornecedor && produto.produto.descricaoFornecedor.toLowerCase().includes(value.toLowerCase())) ||
-    //                         (produto.produto.nomeFornecedor && produto.produto.nomeFornecedor.toLowerCase().includes(value.toLowerCase())) ||
-    //                         (produto.produto.idFabricante && produto.produto.idFabricante.toLowerCase().includes(value.toLowerCase()))
-    //                 );
-    //                 // console.log("Produto objeto retornado:", produtosFiltrados);
-    //                 this.setState({
-    //                     produtos: produtosFiltrados,
-    //                     produtoSelecionado: null,
-    //                     carregando: false,
-    //                 });
-    //             } else {
-    //                 this.setState({
-    //                     produtos: [],
-    //                     carregando: false
-    //                 });
-    //             }
-    //         })
-    //         .catch((error) => {
-    //             // console.log("Erro ao buscar produtos:", error);
-    //             this.setState({
-    //                 produtos: [],
-    //                 carregando: false
-    //             });
-    //         });
-    // };
-
-    // buscarVendedor = (value) => {
-    //     return new Promise((resolve, reject) => {
-    //         // console.log("Buscando vendedor por:", value);
-    //         this.setState({ buscaVendedor: value, carregando: false });
-    //         fetch(`http://localhost:8080/api/v1/contatos`)
-    //             .then((resposta) => {
-    //                 if (!resposta.ok) {
-    //                     throw new Error("Erro na chamada da API");
-    //                 }
-    //                 return resposta.json();
-    //             })
-    //             .then((dados) => {
-    //                 if (dados.retorno.contatos) {
-    //                     const vendedoresFiltrados = dados.retorno.contatos.filter(
-    //                         (contato) =>
-    //                             contato?.contato?.tiposContato?.some(
-    //                                 (tipoContato) => tipoContato?.tipoContato?.descricao?.toLowerCase().includes("vendedor")
-    //                             )
-    //                     );
-    //                     this.setState({
-    //                         vendedores: vendedoresFiltrados,
-    //                         vendedorSelecionado: null,
-    //                         carregando: false,
-    //                         vendedoresFiltrados: vendedoresFiltrados,
-    //                     });
-    //                 } else {
-    //                     this.setState({
-    //                         vendedores: [],
-    //                         carregando: false,
-    //                     });
-    //                 }
-    //                 resolve(); // Resolva a Promise quando a chamada da API for concluída com sucesso
-    //             })
-    //             .catch((error) => {
-    //                 console.log("Erro ao buscar vendedor:", error);
-    //                 this.setState({
-    //                     vendedores: [],
-    //                     carregando: false,
-    //                 });
-    //                 reject(error); // Rejeite a Promise se ocorrer um erro na chamada da API
-    //             });
-    //     });
-    // };
-
-    // -------------------------------------------- FUNÇÕES VENDEDOR --------------------------------------------
-
-    // atualizarBuscaVendedor = (event) => {
-    //     this.setState({
-    //         buscaVendedor: event.target.value
-    //     });
-    // };
-
-    // selecionarVendedor = (contato) => {
-    //     this.setState({
-    //         contatoSelecionado: contato,
-    //         descricao: contato.contato[0].contato.tiposContato[0].tipoContato.descricao,
-    //         contatos: [],
-    //     });
-    //     this.atualizarBuscaContato({ target: { value: '' } });
-    // };
-
-    // adicionarVendedorSelecionado = (vendedorSelecionado) => {
-    //     const { contatosSelecionados, cnpj } = this.state;
-    //     const contatoExistente = contatosSelecionados.find((contato) => contato.contato.id === vendedorSelecionado.contato.id);
-
-    //     if (contatoExistente) {
-    //         contatoExistente.cnpj += cnpj; // Adiciona a quantidade selecionada
-    //     } else {
-    //         contatosSelecionados.push({
-    //             nome: vendedorSelecionado.nome,
-    //             descricao: vendedorSelecionado[0].contato.tiposContato[0].tipoContato.descricao
-    //         });
-    //     }
-
-    //     this.setState({
-    //         contatosSelecionados: contatosSelecionados,
-    //         contatoSelecionado: null,
-    //         nome: '',
-    //         descricao: '',
-    //         contatos: [],
-    //         buscaContato: '',
-    //     });
-    // };
-
-    // -------------------------------------------- FUNÇÕES / CADASTRO DE CONTATO ---------------------------------------------
-
-
-    // adicionarContatoSelecionado = (contatoSelecionado) => {
-    //     const { contatosSelecionados, cnpj } = this.state;
-    //     const contatoExistente = contatosSelecionados.find((contato) => contato.contato.id === contatoSelecionado.contato.id);
-
-    //     if (contatoExistente) {
-    //         contatoExistente.cnpj += cnpj; // Adiciona a quantidade selecionada
-    //     } else {
-    //         contatosSelecionados.push({
-    //             nome: contatoSelecionado.nome,
-    //             cnpj: cnpj, // Salva a quantidade selecionada
-    //         });
-    //     }
-    //     console.log("contatoscontatosSelecionados: ", contatosSelecionados, "contatoExistente: ", contatoExistente)
-    //     this.setState({
-    //         contatosSelecionados: contatosSelecionados,
-    //         contatoSelecionado: null,
-    //         cnpj: '',
-    //         contatos: [],
-    //         buscaContato: '',
-    //     });
-    // };
-
-    // -------------------------------------------- FUNÇÕES PRODUTO / LISTA DE PRODUTO ---------------------------------------------
-
-    // adicionarProdutoSelecionado = (produtoSelecionado) => {
-    //     if (!produtoSelecionado) {
-    //         this.modalInserirProduto()
-    //         return;
-    //     }
-
-    //     const { produtosSelecionados, quantidade, preco, precoUnitario } = this.state;
-    //     const produtoExistenteIndex = produtosSelecionados.findIndex((produto) => produto.produto.id === produtoSelecionado.produto.id);
-
-    //     if (produtoExistenteIndex !== -1) {
-    //         produtosSelecionados[produtoExistenteIndex].quantidade += quantidade;
-    //     } else {
-    //         produtosSelecionados.push({
-    //             produto: produtoSelecionado.produto,
-    //             quantidade: quantidade,
-    //             preco: preco,
-    //             precoUnitario: preco,
-    //             valorUnitarioLista: preco // Defina o valor do campo "Valor unitário" como o preço do produto adicionado
-    //         });
-    //     }
-
-    //     console.log(produtosSelecionados)
-
-
-    //     this.setState({
-    //         produtosSelecionados: produtosSelecionados,
-    //         produtoSelecionado: null,
-    //         buscaProduto: '',
-    //         produtos: [],
-    //         quantidade: 1,
-    //         valorTotal: '',
-    //         preco: '',
-    //         desconto: 0,
-    //         comentario: '',
-    //         descontoInicialProduto: ''
-    //     }, () => {
-    //         this.calcularTotal();
-    //     });
-    // };
-
-    // -------------------------------------------- FUNÇÕES CAMPO FRETE --------------------------------------------
-
-    // incrementarQuantidade = () => {
-    //     this.setState(prevState => ({
-    //         quantidade: prevState.quantidade + 1
-    //     }),
-    //         this.atualizarValorTotal);
-    // };
-
-    // decrementarQuantidade = () => {
-    //     this.setState(prevState => ({
-    //         quantidade: prevState.quantidade > 1 ? prevState.quantidade - 1 : 1
-    //     }),
-    //         this.atualizarValorTotal);
-    // };
-
-    // atualizaTotalComFrete(event) {
-    //     const valor = event.target.value;
-    //     // console.log('valor:', valor);
-    //     let frete = 0;
-    //     if (typeof valor === 'string') {
-    //         frete = parseFloat(valor);
-    //     }
-    //     // console.log('frete:', frete);
-    //     const subTotal = this.state.subTotal.toFixed(2);
-    //     const totalComDesconto = this.state.totalComDesconto;
-    //     // console.log('subTotal:', subTotal);
-    //     // console.log('totalComDesconto:', totalComDesconto);
-    //     let subTotalComFrete;
-    //     if (totalComDesconto && totalComDesconto.length > 0) {
-    //         subTotalComFrete = (parseFloat(totalComDesconto) + frete).toFixed(2);
-    //     } else {
-    //         subTotalComFrete = (parseFloat(subTotal) + frete).toFixed(2);
-    //     }
-    //     // console.log('subTotalComFrete:', subTotalComFrete);
-    //     this.setState({
-    //         subTotalComFrete: subTotalComFrete,
-    //         frete: frete,
-    //         freteInserido: true
-    //     });
-    // };
-
-    // atualizaDataPrevista = (novaDataPrevista) => {
-    //     // console.log(novaDataPrevista);
-    //     const dataPrevista = novaDataPrevista.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    //     // console.log(dataPrevista);
-    //     this.setState({
-    //         dataPrevista: novaDataPrevista
-    //     });
-    // };
-
-    // -------------------------------------------- FUNÇÕES TELA SELEÇÃO DE LOJA E UNIDADE --------------------------------------------
-
-
-    // handleChangeDesconto = (event) => {
-    //     const { value } = event.target;
-    //     const desconto = parseFloat(value);
-
-    //     if (isNaN(desconto)) {
-    //         this.setState({ desconto: "" });
-    //         return;
-    //     }
-
-    //     const { subTotal } = this.state;
-    //     const totalComDesconto = (subTotal - desconto).toFixed(2);
-
-    //     this.setState({ desconto, totalComDesconto });
-    // };
-
-
-    // calcularValorTotalInicial = () => {
-    //     const { preco } = this.state;
-    //     const quantidade = 1;
-    //     const valorTotal = quantidade * parseFloat(preco);
-    //     this.setState({ quantidade, valorTotal });
-    // };
-
-    // calcularTotalComDesconto = (desconto, subTotal) => {
-    //     const subtotal = subTotal || this.calcularTotal();
-    //     const valorDesconto = desconto || 0;
-    //     const totalComDesconto = subtotal - valorDesconto;
-
-    //     const formattedValorDesconto = valorDesconto.toFixed(2);
-    //     const formattedTotalComDesconto = totalComDesconto.toFixed(2);
-
-    //     console.log("valorDesconto: ", formattedValorDesconto);
-    //     console.log("totalComDesconto: ", formattedTotalComDesconto);
-
-
-    //     if (isNaN(totalComDesconto)) {
-    //         console.log("Total com desconto é NaN!");
-    //     }
-
-    //     return {
-    //         valorDesconto: formattedValorDesconto,
-    //         totalComDesconto: formattedTotalComDesconto
-    //     };
-    // }
-
-
-    // -------------------------------------------- FUNÇÕES PARCELAS ---------------------------------------------
-
-    // handleFormaChange = (index, event) => {
-    //     const parcelas = [...this.state.parcelas];
-    //     parcelas[index].forma = event.target.value;
-    //     this.setState({
-    //         parcelas
-    //     });
-    // };
-
-    // handleChangeParcela(index, campo, valor) {
-    //     const parcelas = [...this.state.parcelas];
-    //     parcelas[index][campo] = valor;
-    //     this.setState({ parcelas });
-    // }
-
-    // adicionarParcela() {
-    //     const { condicao } = this.state;
-    //     const dias = parseInt(condicao);
-    //     const hoje = new Date();
-    //     const data = new Date(hoje.getTime() + dias * 24 * 60 * 60 * 1000);
-    //     const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-    //     const novaParcela = {
-    //         dias,
-    //         data: dataFormatada,
-    //         valor: '',
-    //         forma: '',
-    //         observacao: '',
-    //         acao: '',
-    //     };
-
-    //     console.log(dataFormatada)
-
-    //     let parcelas = [...this.state.parcelas];
-    //     const index = parcelas.findIndex(parcela => parcela.dias === 0);
-    //     if (index !== -1) {
-    //         parcelas.splice(index, 1);
-    //     }
-    //     parcelas = [...parcelas, novaParcela];
-
-    //     this.setState({ parcelas });
-    // }
-
-    // --------------------------------------- FUNÇÕES EDITAR LISTA DE PRODUTOS (MODAL) ----------------------------------------
-
-    // modalEditarProduto = (produto) => {
-    //     const index = this.state.produtosSelecionados.findIndex((p) => p.produto.id === produto.produto.id);
-    //     const { preco } = produto.produto
-    //     this.setState({
-    //         modalEditarProduto: true,
-    //         produtoSelecionadoIndex: index,
-    //         produtoSelecionadoLista: produto,
-    //         valorLista: preco || '',
-    //         quantidadeLista: produto.quantidade || '',
-    //         descontoItemLista: produto.descontoItem || '',
-    //         valorUnitarioLista: produto.precoUnitario || '',
-    //         valorTotalLista: produto.subTotal || '',
-    //         observacaointerna: produto.observacaointerna || '',
-    //         valorUnitarioOriginal: preco, // Salva o valor original do campo PRECO UNITARIO
-    //     }, () => {
-    //         this.atualizaSubTotalLista();
-    //     });
-    // };
-
-    // atualizaValorLista = (event) => {
-    //     this.setState({
-    //         valorLista: event.target.value
-    //     });
-    // };
-
-    // atualizaQuantidadeLista = (event) => {
-    //     const quantidadeLista = Number(event.target.value);
-    //     this.setState({
-    //         quantidadeLista
-    //     },
-    //         this.atualizaSubTotalLista
-    //     );
-    // };
-
-    // atualizaDescontoItem = (event) => {
-    //     const descontoItemLista = event.target.value;
-    //     this.setState({
-    //         descontoItemLista
-    //     });
-    // };
-
-    // atualizaValorUnitario = (event) => {
-    //     const valorUnitarioLista = event.target.value;
-    //     this.setState({
-    //         valorUnitarioLista
-    //     });
-    // };
-
-    // aplicaDescontoItem = () => {
-    //     const { descontoItemLista, valorUnitarioOriginal, quantidadeLista } = this.state;
-
-    //     if (descontoItemLista !== '') {
-
-    //         const descontoPorcentagem = parseFloat(descontoItemLista.replace(',', '.'));
-    //         const descontoDecimal = descontoPorcentagem / 100;
-    //         const novoValorUnitario = valorUnitarioOriginal - (valorUnitarioOriginal * descontoDecimal);
-    //         const valorTotalLista = (quantidadeLista * novoValorUnitario).toFixed(2);
-
-    //         this.setState({
-    //             valorUnitarioLista: novoValorUnitario.toFixed(2),
-    //             valorTotalLista: valorTotalLista
-    //         }, () => {
-    //             console.log('Novo valor unitário:', this.state.valorUnitarioLista);
-    //             console.log('Subtotal:', this.state.valorTotalLista);
-    //         });
-    //     } else {
-    //         this.setState({
-    //             valorUnitarioLista: valorUnitarioOriginal,
-    //             valorTotalLista: (quantidadeLista * valorUnitarioOriginal).toFixed(2)
-    //         }, () => {
-    //             console.log('Valor unitário original restaurado:', this.state.valorUnitarioLista);
-    //             console.log('Subtotal:', this.state.valorTotalLista);
-    //         });
-    //     }
-    // };
-
-    // atualizaSubTotalLista = () => {
-    //     const { quantidadeLista, valorUnitarioLista } = this.state;
-
-    //     if (valorUnitarioLista !== '' && !isNaN(parseFloat(valorUnitarioLista))) {
-    //         const valorTotalLista = (quantidadeLista * parseFloat(valorUnitarioLista)).toFixed(2);
-
-    //         this.setState({
-    //             valorTotalLista: valorTotalLista
-    //         }, () => {
-    //             console.log('Subtotal:', this.state.valorTotalLista);
-    //         });
-    //     } else {
-    //         this.setState({
-    //             valorTotalLista: '0.00'
-    //         }, () => {
-    //             console.log('Subtotal:', this.state.valorTotalLista);
-    //         });
-    //     }
-    // };
-
-    // salvarProdutoLista = () => {
-    //     const { produtoSelecionadoIndex, quantidadeLista, valorUnitarioLista, descontoItemLista, produtosSelecionados } = this.state;
-
-    //     if (produtoSelecionadoIndex !== null && produtoSelecionadoIndex >= 0) {
-    //         const produtosAtualizados = [...produtosSelecionados];
-    //         let novoPreco = parseFloat(valorUnitarioLista);
-
-    //         const produtoAtualizado = {
-    //             ...produtosAtualizados[produtoSelecionadoIndex],
-    //             quantidade: quantidadeLista,
-    //             preco: novoPreco,
-    //             descontoItem: descontoItemLista
-    //         };
-
-    //         produtosAtualizados[produtoSelecionadoIndex] = produtoAtualizado;
-    //         this.setState({
-    //             produtosSelecionados: produtosAtualizados,
-    //             modalEditarProduto: false,
-    //             valorLista: '',
-    //             quantidadeLista: '',
-    //             valorUnitarioLista: '',
-    //         });
-    //     }
-    // };
-
-    // atualizaDescontoItem = (event) => {
-    //     const descontoItemLista = event.target.value;
-    //     const { quantidadeLista, valorUnitarioLista } = this.state;
-
-    //     // Verificar se há um desconto aplicado
-    //     if (descontoItemLista) {
-    //         const desconto = parseFloat(descontoItemLista.replace(",", "."));
-
-    //         // Atualizar o valor unitário subtraindo o desconto
-    //         const novoValorUnitario = (valorUnitarioLista - desconto).toFixed(2);
-
-    //         this.setState(
-    //             {
-    //                 descontoItemLista,
-    //                 valorUnitarioLista: novoValorUnitario,
-    //             },
-    //             this.atualizaSubTotalLista
-    //         );
-    //     } else {
-    //         this.setState(
-    //             {
-    //                 descontoItemLista,
-    //             },
-    //             this.atualizaSubTotalLista
-    //         );
-    //     }
-    // };
-
-    // atualizaValorUnitario = (event) => {
-    //     let valorUnitarioLista = event.target.value;
-    //     if (valorUnitarioLista.includes(",")) {
-    //         valorUnitarioLista = valorUnitarioLista.replace(",", ".");
-    //     }
-    //     this.setState(
-    //         {
-    //             valorUnitarioLista
-    //         },
-    //         this.atualizaSubTotalLista
-    //     );
-    // };
-
-    // atualizaSubTotalLista = () => {
-    //     const { quantidadeLista, valorUnitarioLista } = this.state;
-    //     const valorTotalLista = (quantidadeLista * parseFloat(valorUnitarioLista)).toFixed(2);
-    //     this.setState({
-    //         valorTotalLista
-    //     });
-    // };
-
-    // atualizaDescontoItem = (event) => {
-    //     this.setState({
-    //         descontoItemLista: event.target.value
-    //     });
-    // };
-
-    // atualizaValorUnitario = (event) => {
-    //     let valorUnitarioLista = event.target.value;
-    //     if (valorUnitarioLista.includes(",")) {
-    //         valorUnitarioLista = valorUnitarioLista.replace(",", ".");
-    //     }
-    //     this.setState({
-    //         valorUnitarioLista
-    //     }, this.atualizaSubTotalLista);
-    // };
-
-
-    // atualizaSubTotalLista = () => {
-    //     const { quantidadeLista, valorUnitarioLista } = this.state;
-    //     const valorTotalLista = (quantidadeLista * parseFloat(valorUnitarioLista)).toFixed(2);
-    //     this.setState({
-    //         valorTotalLista
-    //     });
-    // };
 }
-
-
 
 export default FrenteCaixa;
 
