@@ -42,6 +42,8 @@ class CadastroLoja extends Component {
 
   }
 
+  //----------------------------------------- API BUSCA LOJAS ----------------------------------------------------------
+
   buscarLojas = () => {
     return new Promise((resolve, reject) => {
       fetch('http://localhost:8080/api/v1/selecionarLojas')
@@ -67,6 +69,8 @@ class CadastroLoja extends Component {
         });
     });
   };
+
+  //----------------------------------------- API BUSCA IDLOJA ----------------------------------------------------------
 
   buscarIdLoja = (idLoja) => {
     fetch(`http://localhost:8080/api/v1/selecionarLoja/${idLoja}`)
@@ -94,6 +98,8 @@ class CadastroLoja extends Component {
       });
   };
 
+  //----------------------------------------- API DELETE IDLOJA ----------------------------------------------------------
+
   deletarLoja = (idLoja) => {
     fetch(`http://localhost:8080/api/v1/deletarLoja/${idLoja}`, {
       //   fetch(`https://dev-api-forma-pagamento.azurewebsites.net/api/v1/${idLoja}`, {
@@ -111,6 +117,8 @@ class CadastroLoja extends Component {
         console.error('Erro ao deletar a loja:', error);
       });
   };
+
+  //----------------------------------------- API CADASTRAR LOJA ----------------------------------------------------------
 
   adicionarLoja = (selecionaLoja) => {
     // console.log(selecionaLoja)
@@ -142,7 +150,8 @@ class CadastroLoja extends Component {
       });
   };
 
-  //PUT - MÉTODO PARA ATUALIZAR UM PRODUTO EXISTENTE
+  //----------------------------------------- API ATUALIZAR LOJA ----------------------------------------------------------
+
   atualizarLoja = (selecionaLoja) => {
     const id = this.state.id;
 
@@ -172,6 +181,13 @@ class CadastroLoja extends Component {
       });
   };
 
+  //-----------------------------------------------------------------------------------------------------------------------|
+  //----------------------------------------- FUNÇÕES DE AÇÕES (EVENTOS) TELA ---------------------------------------------|
+  //-----------------------------------------------------------------------------------------------------------------------|
+
+  //-----------------------------------------------------------------------------------------------------------------------|
+  //---------------------------------------------- FUNÇÕES CAMPOS TELA ----------------------------------------------------|
+  //-----------------------------------------------------------------------------------------------------------------------|
 
   atualizarIDLoja = (event) => {
     const idLoja = event.target.value;
@@ -196,6 +212,10 @@ class CadastroLoja extends Component {
       unidadeLoja: unidadeLoja
     });
   };
+
+  //-----------------------------------------------------------------------------------------------------------------------|
+  // -------------------------------------------------- FUNÇÕES BOTÕES ----------------------------------------------------|
+  //-----------------------------------------------------------------------------------------------------------------------|
 
   reset = () => {
     this.setState({
@@ -258,6 +278,10 @@ class CadastroLoja extends Component {
   campoBusca = (event) => {
     this.setState({ searchTerm: event.target.value });
   };
+
+  //-----------------------------------------------------------------------------------------------------------------------|
+  //--------------------------------------- SCRIPT´S DE AÇÃO DO MODALS DE CADASTRO. ---------------------------------------|
+  //-----------------------------------------------------------------------------------------------------------------------|
 
   modalCadastrarLoja = () => {
     this.setState({

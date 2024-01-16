@@ -99,7 +99,6 @@ class Produto extends React.Component {
             searchTerm: '',
             situacao: 'Ativo',
             carregando: true,
-            modalAberta: false,
             modalExcluirProduto: false,
             modalExcluindoProduto: false,
             modalSalvarProduto: false,
@@ -1169,20 +1168,6 @@ class Produto extends React.Component {
     //--------------------------------------------- SCRIPT´S DE AÇÃO DOS MODALS. --------------------------------------------|
     //-----------------------------------------------------------------------------------------------------------------------|
 
-    // //Ação para fechar o modal de cadastro e atualização.
-    // fecharModal = () => {
-    //     this.setState({
-    //         modalAberta: false,
-    //         validated: false
-    //     });
-    // };
-
-    // //Ação para abrir o modal de cadastro e atualização.
-    // abrirModal = () => {
-    //     this.setState({
-    //         modalAberta: true
-    //     });
-    // };
 
     modalCadastrarLista = () => {
         this.setState({
@@ -1244,12 +1229,15 @@ class Produto extends React.Component {
     };
 
     abrirTelaRenderTelaLista = (produto) => {
-        // Adicione aqui qualquer lógica adicional antes de abrir a tela
-        this.setState({ selectedListId: produto });
+        this.setState({
+            selectedListId: produto
+        });
     };
 
     abrirRenderTelaLista = () => {
-        this.setState({ showRenderTelaLista: true });
+        this.setState({
+            showRenderTelaLista: true
+        });
     };
 
     render() {

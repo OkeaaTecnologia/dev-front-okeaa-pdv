@@ -16,11 +16,6 @@ import { BsShieldFillExclamation } from 'react-icons/bs';
 
 import { parse } from 'js2xmlparser';
 
-// import { BsPencilSquare } from 'react-icons/bs';
-// import DatePicker from 'react-datepicker';
-//import 'react-datepicker/dist/react-datepicker.css';
-
-
 class Contato extends React.Component {
 
     constructor(props) {

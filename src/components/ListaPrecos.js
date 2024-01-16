@@ -57,7 +57,7 @@ class ListaPrecos extends Component {
             modalExcluindoLista: false,
             produtoNaoLocalizado: false,
             listaspreco: [],
-            searchTerm: '',          // Adicionando o campo searchTerm
+            searchTerm: '',
             produtos: [],
             codigo: 0,
             buscaProduto: '',
@@ -67,6 +67,8 @@ class ListaPrecos extends Component {
     componentDidMount() {
         this.buscarListaPreco();
     };
+
+    //----------------------------------------- API BUSCA PRODUTOS ----------------------------------------------------------
 
     buscarProdutos = (value) => {
         return new Promise((resolve, reject) => {
@@ -154,6 +156,8 @@ class ListaPrecos extends Component {
         return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     };
 
+    //----------------------------------------- API BUSCA LISTAS ----------------------------------------------------------
+
     buscarListaPreco = () => {
         fetch("http://localhost:8081/api/v1/selecionarListas", {
             method: 'GET',
@@ -193,6 +197,8 @@ class ListaPrecos extends Component {
                 });
             });
     };
+
+    //----------------------------------------- API BUSCA IDLISTA ----------------------------------------------------------
 
     buscarIdLista = (idLista) => {
         fetch(`http://localhost:8081/api/v1/selecionarLista/${idLista}`)
@@ -251,6 +257,8 @@ class ListaPrecos extends Component {
             });
     };
 
+    //----------------------------------------- API DELETE IDLISTA ----------------------------------------------------------
+
     deletarLista(idLista) {
         const statusCode = fetch(`http://localhost:8081/api/v1/deletarLista/${idLista}`, {
             // fetch(`https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produto/${codigo}`, {
@@ -266,6 +274,8 @@ class ListaPrecos extends Component {
         console.log(statusCode)
         return statusCode;
     };
+
+    //----------------------------------------- API CADASTRAR LISTA ----------------------------------------------------------
 
     cadastrarLista = (listaPrecoResponse) => {
         return fetch('http://localhost:8081/api/v1/adicionarLista/', {
@@ -294,7 +304,8 @@ class ListaPrecos extends Component {
             });
     };
 
-    //PUT - MÉTODO PARA ATUALIZAR UM PRODUTO EXISTENTE
+    //----------------------------------------- API ATUALIZAR LISTA ----------------------------------------------------------
+
     atualizarLista = (listaPrecoResponse) => {
         const idLista = this.state.idLista;
 
@@ -782,14 +793,7 @@ class ListaPrecos extends Component {
                     </div>
 
                     <Modal
-                        show={this.state.modalCadastrarLista}
-                        onHide={this.modalCadastrarLista}
-                        size="xl"
-                        fullscreen="xxl-down"
-                        backdrop="static"
-                        dialogClassName="modal-90w"
-                        aria-labelledby="example-custom-modal-styling-title"
-                    >
+                        show={this.state.modalCadastrarLista} onHide={this.modalCadastrarLista} size="xl" fullscreen="xxl-down" backdrop="static" dialogClassName="modal-90w" aria-labelledby="example-custom-modal-styling-title">
                         <Modal.Header closeButton className="modal-produto-header">
                             <Modal.Title>Lista de preços</Modal.Title>
                         </Modal.Header>
