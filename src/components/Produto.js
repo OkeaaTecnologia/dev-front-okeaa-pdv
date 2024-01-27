@@ -9,6 +9,7 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import { Pagination } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { Image } from 'react-bootstrap';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -112,8 +113,46 @@ class Produto extends React.Component {
             idLista: '',
             precoLista: '',
             produtosSelecionados: [],
-            dadosCarregados: false
+            dadosCarregados: false,
+            paginaAtual: 1,
+            totalPaginas: ''
         };
+
+        // Ambiente Local
+        this.buscarProdutosEndpoint = 'http://localhost:8081/api/v1/produtos'
+        this.carregarProdutosEndpoint = 'http://localhost:8081/api/v1/produto'
+        this.carregarProdutoFornecedorEndpoint = 'http://localhost:8081/api/v1/produtosfornecedores'
+        this.buscarCategoriasEndpoint = 'http://localhost:8081/api/v1/categorias'
+        this.excluirProdutoEndpoint = 'http://localhost:8081/api/v1/produto'
+        this.cadastraProdutoEndpoint = 'http://localhost:8081/api/v1/cadastrarproduto'
+        this.cadastrarListaEndpoint = 'http://localhost:8081/api/v1/adicionarLista'
+        this.cadastraProdutoFornecedorEndpoint = 'http://localhost:8081/api/v1/cadastrarprodutofornecedor'
+        this.atualizarProdutoEndpoint = 'http://localhost:8081/api/v1/atualizarproduto/'
+        this.atualizarProdutoFornecedorEndpoint = 'http://localhost:8081/api/v1/atualizarprodutofornecedor/'
+
+        // Ambiente Desenvolvimento
+        // this.buscarProdutosEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produtos'
+        // this.carregarProdutosEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produto'
+        // this.carregarProdutoFornecedorEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produtosfornecedores'
+        // this.buscarCategoriasEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/categorias'
+        // this.excluirProdutoEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produto'
+        // this.cadastraProdutoEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarproduto'
+        // this.cadastrarListaEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/adicionarLista'
+        // this.cadastraProdutoFornecedorEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarprodutofornecedor'
+        // this.atualizarProdutoEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarprodutofornecedor/'
+        // this.atualizarProdutoFornecedorEndpoint = 'https://dev-api-okeaa-produto.azurewebsites.net/api/v1/atualizarprodutofornecedor/'
+
+        // Ambiente Produção
+        //   this.buscarProdutosEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/produtos'
+        // this.carregarProdutosEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/produto'
+        // this.carregarProdutoFornecedorEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/produtosfornecedores'
+        // this.buscarCategoriasEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/categorias'
+        // this.excluirProdutoEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/produto'
+        // this.cadastraProdutoEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarproduto'
+        // this.cadastrarListaEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/adicionarLista'
+        // this.cadastraProdutoFornecedorEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarprodutofornecedor'
+        // this.atualizarProdutoEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarprodutofornecedor/'
+        // this.atualizarProdutoFornecedorEndpoint = 'https://prod-api-okeaa-produto.azurewebsites.net/api/v1/atualizarprodutofornecedor/' 
     };
 
     async componentDidMount() {
@@ -145,9 +184,11 @@ class Produto extends React.Component {
     //-----------------------------------------------------------------------------------------------------------------------|
 
     //GET - MÉTODO PARA CONSUMO DE PRODUTOS
-    buscarProdutos = () => {
-        fetch("http://localhost:8081/api/v1/produtos", {
-            // fetch("https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produtos", {
+    buscarProdutos = (pagina) => {
+        // Se a página não for fornecida, utilize a página atual do estado
+        const paginaRequisicao = pagina !== undefined ? pagina : this.state.paginaAtual;
+
+        fetch(`${this.buscarProdutosEndpoint}/page=${paginaRequisicao}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -158,22 +199,30 @@ class Produto extends React.Component {
                 // console.log(dados)
                 if (dados.retorno.produtos) {
                     this.setState({
-                        produtos: dados.retorno.produtos
+                        produtos: dados.retorno.produtos,
+                        paginaAtual: paginaRequisicao,  // Atualiza a página atual no estado
+                        carregando: false
                     });
                 } else {
-                    this.setState({ produtos: [] }); // Corrigido para incluir carregando: false
+                    this.setState({ carregando: false });
                 }
-
-                this.setState({ carregando: false })
+            })
+            .catch(erro => {
+                console.error('Erro ao buscar contatos:', erro);
+                this.setState({ carregando: false });
             });
+    };
+
+    handleSelecionaPagina = (pagina) => {
+        this.setState({ carregando: true });
+        this.buscarProdutos(pagina);
     };
 
     //GET - MÉTODO PARA CONSUMO DE UM PRODUTO PELO ID
     carregarProdutos = (codigo) => {
         this.setState({ carregando: true, dadosCarregados: false });
 
-        fetch(`http://localhost:8081/api/v1/produto/${codigo}`, {
-            // fetch(`https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produto/${codigo}`, {
+        fetch(`${this.carregarProdutosEndpoint}/${codigo}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -264,7 +313,7 @@ class Produto extends React.Component {
     };
 
     carregarProdutoFornecedor = (idProduto) => {
-        fetch(`http://localhost:8081/api/v1/produtosfornecedores`, {
+        fetch(this.carregarProdutoFornecedorEndpoint, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -378,9 +427,7 @@ class Produto extends React.Component {
 
     //GET - MÉTODO PARA CONSUMO DE CATEGORIAS
     buscarCategorias = () => {
-        fetch("http://localhost:8081/api/v1/categorias", {
-            // fetch("https://dev-api-okeaa-produto.azurewebsites.net/api/v1/categorias", {
-
+        fetch(this.buscarCategoriasEndpoint, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -400,9 +447,7 @@ class Produto extends React.Component {
 
     //DELETE - MÉTODO PARA DELETAR UM PRODUTO
     excluirProduto(codigo) {
-        const statusCode = fetch(`http://localhost:8081/api/v1/produto/${codigo}`, {
-            // fetch(`https://dev-api-okeaa-produto.azurewebsites.net/api/v1/produto/${codigo}`, {
-
+        const statusCode = fetch(`${this.excluirProdutoEndpoint}/${codigo}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -421,8 +466,7 @@ class Produto extends React.Component {
         const xml = parser.parseFromString(xmlProduto, 'text/xml');
         const stringXml = new XMLSerializer().serializeToString(xml);
 
-        return fetch('http://localhost:8081/api/v1/cadastrarproduto', {
-            // fetch('https://dev-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarproduto', {
+        return fetch(this.cadastraProdutoEndpoint, {
             method: 'POST',
             body: stringXml,
             headers: {
@@ -449,7 +493,7 @@ class Produto extends React.Component {
     };
 
     cadastrarLista = (listaPrecoResponse) => {
-        return fetch('http://localhost:8081/api/v1/adicionarLista/', {
+        return fetch(this.cadastrarListaEndpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -480,8 +524,7 @@ class Produto extends React.Component {
         const xml = parser.parseFromString(xmlProdutoFornecedor, 'text/xml');
         const stringXml = new XMLSerializer().serializeToString(xml);
 
-        return fetch('http://localhost:8081/api/v1/cadastrarprodutofornecedor', {
-            // fetch('https://dev-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarprodutofornecedor', {
+        return fetch(this.cadastraProdutoFornecedorEndpoint, {
             method: 'POST',
             body: stringXml,
             headers: {
@@ -514,9 +557,7 @@ class Produto extends React.Component {
         const stringXml = new XMLSerializer().serializeToString(xml);
         const codigo = xml.querySelector('codigo').textContent;
 
-        return fetch('http://localhost:8081/api/v1/atualizarproduto/' + codigo, {
-            //return fetch('https://dev-api-okeaa-produto.azurewebsites.net/api/v1/cadastrarprodutofornecedor/' + codigo, {
-
+        return fetch(this.atualizarProdutoEndpoint + codigo, {
             method: 'POST',
             body: stringXml,
             headers: {
@@ -548,9 +589,7 @@ class Produto extends React.Component {
         const stringXml = new XMLSerializer().serializeToString(xml);
         const idProdutoFornecedor = xml.querySelector('idProdutoFornecedor').textContent;
 
-        return fetch('http://localhost:8081/api/v1/atualizarprodutofornecedor/' + idProdutoFornecedor, {
-            //return fetch('https://dev-api-okeaa-produto.azurewebsites.net/api/v1/atualizarprodutofornecedor/' + idProdutoFornecedor, {
-
+        return fetch(this.atualizarProdutoFornecedorEndpoint + idProdutoFornecedor, {
             method: 'POST',
             body: stringXml,
             headers: {
@@ -1168,7 +1207,6 @@ class Produto extends React.Component {
     //--------------------------------------------- SCRIPT´S DE AÇÃO DOS MODALS. --------------------------------------------|
     //-----------------------------------------------------------------------------------------------------------------------|
 
-
     modalCadastrarLista = () => {
         this.setState({
             modalCadastrarLista: !this.state.modalCadastrarLista
@@ -1242,7 +1280,7 @@ class Produto extends React.Component {
 
     render() {
 
-        const { selectedListId, showRenderTelaLista, carregando, searchTerm, produtos, modalSalvarProduto, modalExcluirProduto, codigoProdutoParaExcluir, modalExcluindoProduto } = this.state
+        const { selectedListId, showRenderTelaLista, carregando, searchTerm, produtos, modalSalvarProduto, modalExcluirProduto, codigoProdutoParaExcluir, modalExcluindoProduto, paginaAtual, totalPaginas } = this.state
 
         if (showRenderTelaLista) {
             return this.renderTelaLista();
@@ -1382,6 +1420,35 @@ class Produto extends React.Component {
                                 </tbody>
                             </Table>
                         </Container>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
+                            <div>
+                                <Pagination>
+                                    <Pagination.Prev
+                                        onClick={() => {
+                                            this.handleSelecionaPagina(paginaAtual - 1);
+                                        }}
+                                        disabled={paginaAtual === 1}
+                                    />
+                                    {[...Array(totalPaginas)].map((_, index) => (
+                                        <Pagination.Item
+                                            key={index + 1}
+                                            active={index + 1 === paginaAtual}
+                                            onClick={() => {
+                                                this.handleSelecionaPagina(index + 1);
+                                            }}
+                                        >
+                                            {index + 1}
+                                        </Pagination.Item>
+                                    ))}
+                                    <Pagination.Next
+                                        onClick={() => {
+                                            this.handleSelecionaPagina(paginaAtual + 1);
+                                        }}
+                                        disabled={paginaAtual === totalPaginas}
+                                    />
+                                </Pagination>
+                            </div>
+                        </div>
 
                         <Modal show={modalSalvarProduto} onHide={this.modalSalvarProduto} centered>
                             <Modal.Body>

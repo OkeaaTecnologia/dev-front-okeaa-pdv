@@ -32,21 +32,42 @@ class CadastroLoja extends Component {
       searchTerm: '',
       data: '',
     };
-  }
 
-  componentDidMount() {
-    this.buscarLojas();
-  }
+    // Ambiente Local
+    this.buscarLojasEndpoint = 'http://localhost:8080/api/v1/selecionarLojas'
+    this.buscarIdLojaEndpoint = 'http://localhost:8080/api/v1/selecionarLoja'
+    this.deletarLojaEndpoint = 'http://localhost:8080/api/v1/deletarLoja'
+    this.adicionarLojaEndpoint = 'http://localhost:8080/api/v1/adicionarLoja'
+    this.atualizarLojaEndpoint = 'http://localhost:8080/api/v1/atualizarLoja'
 
-  componentDidUpdate(prevProps, prevState) {
+    // Ambiente Desenvolvimento
+    // this.buscarLojasEndpoint = 'https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/selecionarLojas'
+    // this.buscarIdLojaEndpoint = 'https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/selecionarLoja'
+    // this.deletarLojaEndpoint = 'https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/deletarLoja'
+    // this.adicionarLojaEndpoint = 'https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/adicionarLoja'
+    // this.atualizarLojaEndpoint = 'https://dev-api-okeaa-pdv.azurewebsites.net/api/v1/atualizarLoja'
 
+    // //Ambiente Produção
+    // this.buscarLojasEndpoint = 'https://prod-api-okeaa-pdv.azurewebsites.net/api/v1/selecionarLojas'
+    // this.buscarIdLojaEndpoint = 'https://prod-api-okeaa-pdv.azurewebsites.net/api/v1/selecionarLoja'
+    // this.deletarLojaEndpoint = 'https://prod-api-okeaa-pdv.azurewebsites.net/api/v1/deletarLoja'
+    // this.adicionarLojaEndpoint = 'https://prod-api-okeaa-pdv.azurewebsites.net/api/v1/adicionarLoja'
+    // this.atualizarLojaEndpoint = 'https://prod-api-okeaa-pdv.azurewebsites.net/api/v1/atualizarLoja'
+  };
+
+  async componentDidMount() {
+    try {
+      this.buscarLojas();
+    } catch (error) {
+      this.setState({ erro: `Erro ao conectar a API: ${error.message}` });
+    }
   }
 
   //----------------------------------------- API BUSCA LOJAS ----------------------------------------------------------
 
   buscarLojas = () => {
     return new Promise((resolve, reject) => {
-      fetch('http://localhost:8080/api/v1/selecionarLojas')
+      fetch(this.buscarLojasEndpoint)
         .then((resposta) => {
           if (!resposta.ok) {
             throw new Error('Erro na chamada da API');
@@ -73,7 +94,7 @@ class CadastroLoja extends Component {
   //----------------------------------------- API BUSCA IDLOJA ----------------------------------------------------------
 
   buscarIdLoja = (idLoja) => {
-    fetch(`http://localhost:8080/api/v1/selecionarLoja/${idLoja}`)
+    fetch(`${this.buscarIdLojaEndpoint}/${idLoja}`)
       .then(response => response.json())
       .then(data => {
         // console.log('Resposta da API:', data);
@@ -101,9 +122,7 @@ class CadastroLoja extends Component {
   //----------------------------------------- API DELETE IDLOJA ----------------------------------------------------------
 
   deletarLoja = (idLoja) => {
-    fetch(`http://localhost:8080/api/v1/deletarLoja/${idLoja}`, {
-      //   fetch(`https://dev-api-forma-pagamento.azurewebsites.net/api/v1/${idLoja}`, {
-
+    fetch(`${this.deletarLojaEndpoint}/${idLoja}`, {
       method: 'DELETE',
     })
       .then(response => {
@@ -122,9 +141,7 @@ class CadastroLoja extends Component {
 
   adicionarLoja = (selecionaLoja) => {
     // console.log(selecionaLoja)
-    return fetch('http://localhost:8080/api/v1/adicionarLoja/', {
-
-      //    fetch('https://dev-api-forma-pagamento.azurewebsites.net/api/v1/adicionarLoja/', {
+    return fetch(this.adicionarLojaEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -155,7 +172,7 @@ class CadastroLoja extends Component {
   atualizarLoja = (selecionaLoja) => {
     const id = this.state.id;
 
-    return fetch(`http://localhost:8080/api/v1/atualizarLoja/${id}`, {
+    return fetch(`${this.atualizarLojaEndpoint}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
