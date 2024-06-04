@@ -20,8 +20,6 @@ import { parse } from 'js2xmlparser';
 import { BsPersonAdd } from 'react-icons/bs';
 import { BsShieldFillExclamation } from 'react-icons/bs';
 import { BsPencilSquare } from 'react-icons/bs';
-import { TbTrashXFilled } from "react-icons/tb";
-
 
 class Produto extends React.Component {
 
@@ -1606,7 +1604,7 @@ class Produto extends React.Component {
                                     <Form.Group controlId="buttonSalvar" className="mb-3">
                                         <div className="button-container d-flex">
                                             <button
-                                                type="submit"
+                                                type="button"
                                                 className="botao-salvar-produto"
                                             >
                                                 Salvar

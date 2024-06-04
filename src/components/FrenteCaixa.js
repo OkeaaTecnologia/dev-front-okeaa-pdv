@@ -182,7 +182,9 @@ class FrenteCaixa extends React.Component {
             subTotalLista: 0,
             objeto: '',
             modalPedidoExcluido: false,
-            situacaoCaixa: ''
+            situacaoCaixa: '',
+            nomeVendedor: '',
+            codigoVendedor: ''
         };
 
         this.atualizaDesconto = this.atualizaDesconto.bind(this);
@@ -636,11 +638,11 @@ class FrenteCaixa extends React.Component {
 
     //----------------------------------------- API BUSCA VENDEDOR ----------------------------------------------------------
 
-    buscarVendedor = (nome, codigo, value) => {
+    buscarVendedor = (nomeVendedor, codigoVendedor, value) => {
         return new Promise((resolve, reject) => {
 
-            const sanitizedNome = this.sanitizeString(nome);
-            const sanitizedCodigo = this.sanitizeString(codigo);
+            const sanitizedNome = this.sanitizeString(nomeVendedor);
+            const sanitizedCodigo = this.sanitizeString(codigoVendedor);
 
             let endpoint = this.buscarVendedorEndpoint;
 
@@ -2864,7 +2866,7 @@ class FrenteCaixa extends React.Component {
         //Produto.
         const { produtos, produtoNaoLocalizado, produtoSelecionado, produtosSelecionados, buscaProduto, preco, quantidade, desconto, imagem, produtoSelecionadoLista, precoBling } = this.state;
         //Contatos.
-        const { contatos, vendedores, contatoNaoLocalizado, vendedorNaoLocalizado, buscaContato, buscaVendedor, vendedorSelecionado, nome, cnpj, rg, ie_rg, tipo, contribuinte,
+        const { contatos, vendedores, nomeVendedor, codigoVendedor, contatoNaoLocalizado, vendedorNaoLocalizado, buscaContato, buscaVendedor, vendedorSelecionado, nome, cnpj, rg, ie_rg, tipo, contribuinte,
             cep, cidade, uf, endereco, numero, complemento, bairro, email, fone, celular } = this.state;
         //Calculos.
         const { valorTotal, subTotalGeral, observacoes, observacaointerna, valorDesconto, dinheiroRecebido, troco, frete, condicao, subTotal, dataPrevista } = this.state;
@@ -2932,12 +2934,12 @@ class FrenteCaixa extends React.Component {
                                                             if (e.key === 'Enter') {
                                                                 e.preventDefault(); // Evita o comportamento padrão de submit do formulário
                                                                 if (buscaVendedor) {
-                                                                    this.buscarVendedor(buscaVendedor, nome, codigo);
+                                                                    this.buscarVendedor(buscaVendedor, nomeVendedor, codigoVendedor);
                                                                 }
                                                             }
                                                         }}
                                                     />
-                                                    <Button variant="secondary" onClick={() => { if (buscaVendedor) { this.buscarVendedor(buscaVendedor, nome, codigo) } }} >
+                                                    <Button variant="secondary" onClick={() => { if (buscaVendedor) { this.buscarVendedor(buscaVendedor, nomeVendedor, codigoVendedor) } }} >
                                                         <FontAwesomeIcon icon={faSearch} />
                                                     </Button>
                                                 </InputGroup>
@@ -3166,7 +3168,7 @@ class FrenteCaixa extends React.Component {
                                                 <Col className="col">
                                                     <Form.Group className="mb-3">
                                                         <Form.Label htmlFor="valorTotal" className="texto-campos">Sub total</Form.Label>
-                                                        <Form.Control type="text" id="valorTotal" className="form-control" name="valorTotal" placeholder="00,00" value={valorTotal ? valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 }).replace('.', ',') : ''} onChange={this.atualizarValorTotal} readOnly />
+                                                        <Form.Control type="text" id="valorTotal" className="form-control" name="valorTotal" placeholder="00,00" value={parseFloat(valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || ''} onChange={this.atualizarValorTotal} readOnly />
                                                     </Form.Group>
                                                 </Col>
                                                 <div>
@@ -3203,17 +3205,17 @@ class FrenteCaixa extends React.Component {
                                                                 <div style={{ alignItems: 'center' }}>
                                                                     <BsArrowDown style={{ color: 'red', flexShrink: 0, marginRight: '5px' }} />
                                                                     <span style={{ color: 'red' }}>
-                                                                        R$ {typeof produto.preco === "number"
-                                                                            ? produto.preco.toFixed(2).replace('.', ',')
-                                                                            : parseFloat(produto.preco).toFixed(2).replace('.', ',')}
+                                                                        R$ {typeof parseFloat(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) === "number"
+                                                                            ? parseFloat(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                                            : parseFloat(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                                     </span>
                                                                 </div>
                                                             )}
                                                             {!this.produtoEstaNaListaDeDesconto(produto) && (
                                                                 <span>
-                                                                    R$ {typeof produto.preco === "number"
-                                                                        ? produto.preco.toFixed(2).replace('.', ',')
-                                                                        : parseFloat(produto.preco).toFixed(2).replace('.', ',')}
+                                                                    R$ {typeof parseFloat(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) === "number"
+                                                                        ? parseFloat(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                                        : parseFloat(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                                 </span>
                                                             )}
                                                         </td>
@@ -3222,13 +3224,13 @@ class FrenteCaixa extends React.Component {
                                                                 <div style={{ alignItems: 'center' }}>
                                                                     <BsArrowDown style={{ color: 'red', flexShrink: 0, marginRight: '5px' }} />
                                                                     <span style={{ color: 'red' }}>
-                                                                        R$ {this.calcularSubTotal(produto.produto, produto.quantidade, produto.preco).toFixed(2).replace('.', ',')}
+                                                                        R$ {this.calcularSubTotal(produto.produto, produto.quantidade, produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                                     </span>
                                                                 </div>
                                                             )}
                                                             {!this.produtoEstaNaListaDeDesconto(produto) && (
                                                                 <span>
-                                                                    R$ {this.calcularSubTotal(produto.produto, produto.quantidade, produto.preco).toFixed(2).replace('.', ',')}
+                                                                    R$ {this.calcularSubTotal(produto.produto, produto.quantidade, produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                                 </span>
                                                             )}
                                                         </td>
@@ -3304,7 +3306,7 @@ class FrenteCaixa extends React.Component {
                                                         <Col className="col" xs={4}>
                                                             <Form.Group className="mb-3">
                                                                 <Form.Label htmlFor="subTotalLista" className="texto-campos">Sub total</Form.Label>
-                                                                <Form.Control type="number" id="subTotalLista" className="form-control no-spinners" name="subTotalLista" value={subTotalLista || ''} disabled />
+                                                                <Form.Control type="text" id="subTotalLista" className="form-control no-spinners" name="subTotalLista" value={parseFloat(subTotalLista).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || ''} disabled />
                                                             </Form.Group>
                                                         </Col>
                                                     </Row>
@@ -3317,31 +3319,31 @@ class FrenteCaixa extends React.Component {
                                         </Modal.Footer>
                                     </Modal>
                                     <div>
-                                        <h5>Totais</h5>
+                                        <h5 className="mb-3">Totais</h5>
                                     </div>
                                     <Row className="row align-items-center">
                                         <Col className="col" xs={3}>
                                             <Form.Group className="mb-3">
                                                 <Form.Label htmlFor="subtotal" className="texto-campos">Sub total</Form.Label>
-                                                <Form.Control type="text" id="subtotal" className="form-control" name="subtotal" placeholder="00,00" value={subTotal ? subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 }).replace('.', ',') : ''} disabled />
+                                                <Form.Control type="text" id="subtotal" className="form-control" name="subtotal" placeholder="00,00" value={parseFloat(subTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || ''} disabled />
                                             </Form.Group>
                                         </Col>
                                         <Col className="col" xs={3}>
                                             <Form.Group className="mb-3">
                                                 <Form.Label htmlFor="totaldavenda" className="texto-campos">Total da venda</Form.Label>
-                                                <Form.Control type="text" id="totaldavenda" className="form-control" name="totaldavenda" placeholder="00,00" defaultValue={subTotalGeral ? subTotalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 }).replace('.', ',') : ''} disabled />
+                                                <Form.Control type="text" id="totaldavenda" className="form-control" name="totaldavenda" placeholder="00,00" value={parseFloat(subTotalGeral).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || ''} disabled />
                                             </Form.Group>
                                         </Col>
                                         <Col className="col" xs={3}>
                                             <Form.Group className="mb-3">
                                                 <Form.Label htmlFor="desconto" className="texto-campos">Valor fora lista (Total)</Form.Label>
-                                                <Form.Control type="text" className="form-control no-spinners" name="desconto" placeholder="00,00" value={this.calcularTotalLista().totalForaDesconto.toFixed(2).replace('.', ',')} disabled />
+                                                <Form.Control type="text" className="form-control no-spinners" name="desconto" placeholder="00,00" value={parseFloat(this.calcularTotalLista().totalForaDesconto).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || ''} disabled />
                                             </Form.Group>
                                         </Col>
                                         <Col className="col" xs={3}>
                                             <Form.Group className="mb-3">
                                                 <Form.Label htmlFor="desconto" className="texto-campos">Valor lista de desconto (Total)</Form.Label>
-                                                <Form.Control type="text" className="form-control no-spinners" name="desconto" placeholder="00,00" value={this.calcularTotalLista().totalNaListaDesconto.toFixed(2).replace('.', ',')} disabled />
+                                                <Form.Control type="text" className="form-control no-spinners" name="desconto" placeholder="00,00" value={parseFloat(this.calcularTotalLista().totalNaListaDesconto).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || ''} disabled />
                                             </Form.Group>
                                         </Col>
                                     </Row>
@@ -3799,7 +3801,7 @@ class FrenteCaixa extends React.Component {
                                                                 <Col>
                                                                     <Form.Control
                                                                         type="number"
-                                                                        value={parcela.dias}
+                                                                        value={parcela.dias || 0}
                                                                         onChange={(event) => this.handleChangeDias(index, event.target.value)}
                                                                         className="form-control text-center no-spinners"
                                                                     />
@@ -3811,7 +3813,7 @@ class FrenteCaixa extends React.Component {
                                                                         type="text"
                                                                         value={this.calcularData(parcela.dias) || ''}
                                                                         disabled
-                                                                        className=" form-control text-center"
+                                                                        className="form-control text-center"
                                                                     />
                                                                 </Col>
                                                             </td>
@@ -3820,7 +3822,7 @@ class FrenteCaixa extends React.Component {
                                                                     <Form.Control
                                                                         placeholder="00,00"
                                                                         type="number"
-                                                                        value={parcela.valor}
+                                                                        value={parcela.valor || ''}
                                                                         onChange={(event) => this.handleValorChangeParcela(index, 'valor', event.target.value)}
                                                                         className="form-control text-center no-spinners" />
                                                                 </Col>

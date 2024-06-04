@@ -436,8 +436,8 @@ class ControleCaixa extends Component {
             descricaoLoja: descricaoLoja,
             operadorAbertura: operadorAbertura,
             dataAbertura: dataAbertura,
-            trocoCaixaAnterior: trocoCaixaAnterior,
-            trocoCaixa: trocoCaixa,
+            trocoCaixaAnterior: parseFloat(trocoCaixaAnterior).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            trocoCaixa: parseFloat(trocoCaixa).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
         };
 
         const controleCaixa = JSON.stringify(lista);
@@ -699,7 +699,7 @@ class ControleCaixa extends Component {
                     </Container >
                     <div className="table-container-produto">
                         <Container fluid className="pb-5">
-                            <Table bordered hover variant="warning" responsive="xl">
+                            <Table hover variant="warning" responsive="xl">
                                 <thead>
                                     <tr>
                                         <th title="Loja">Loja</th>
@@ -892,24 +892,27 @@ class ControleCaixa extends Component {
                                     <div className="d-flex justify-content-between align-items-center">
                                         <span className="mb-3" style={{ fontWeight: 'bold', color: 'gray', fontSize: '1.6rem', fontStyle: 'italic' }}>CONTROLE DE CAIXA</span>
                                         <Form.Group controlId="buttonSalvar" className="mb-3">
-                                            <div className="button-container d-flex">
+                                            <div className="button-container d-flex flex-wrap">
                                                 <button
-                                                    type="submit"
+                                                    type="button"
                                                     onClick={() => { this.submitFecharCaixa(); this.reset(); }}
-                                                    className="botao-cadastro-produto"
+                                                    className={"botao-cadastro-produto btn btn-primary btn-lg mr-2 mb-2 mb-lg-0"}
+                                                    style={{ flex: "1 1 auto" }}
                                                 >
                                                     Salvar
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => this.novaRenderizacao()}
-                                                    className="botao-cancelar-produto"
+                                                    className={"botao-cancelar-produto btn btn-secondary btn-lg"}
+                                                    style={{ flex: "1 1 auto" }}
                                                 >
                                                     Cancelar
                                                 </button>
                                             </div>
                                         </Form.Group>
                                     </div>
+
                                     <Row className="row align-items-center">
                                         <Col xs={12} md={8}>
                                             <Col className="col">
@@ -1010,8 +1013,8 @@ class ControleCaixa extends Component {
                                                                         <td>{listasCaixa.descricaoLoja}</td>
                                                                         <td>{listasCaixa.operadorAbertura}</td>
                                                                         <td>{listasCaixa.dataAbertura}</td>
-                                                                        <td>{listasCaixa.trocoCaixaAnterior}</td>
-                                                                        <td>{listasCaixa.trocoCaixa}</td>
+                                                                        <td>{parseFloat(listasCaixa.trocoCaixaAnterior).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                                        <td>{parseFloat(listasCaixa.trocoCaixa).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                                         <td>{listasCaixa.operadorFechamento}</td>
                                                                         <td>{listasCaixa.dataFechamento}</td>
                                                                     </tr>
@@ -1027,7 +1030,7 @@ class ControleCaixa extends Component {
                                         <Col md={12}>
                                             <div className="table-container-produto row align-items-center">
                                                 <Container fluid className="pb-5">
-                                                    <Table striped bordered hover responsive="xl" value>
+                                                    <Table hover variant="warning" responsive="xl">
                                                         <thead>
                                                             <tr>
                                                                 <th>Descrição</th>
@@ -1039,26 +1042,25 @@ class ControleCaixa extends Component {
                                                         <tbody>
                                                             {this.state.formaPagamentoCaixa.map((formaPagamento, index) => {
                                                                 const totalCalculado = parseFloat(formaPagamento.totalCalculado);
-                                                                const totalInformado = this.state.totalInformadoCaixa[index]; // Acessando diretamente o índice correspondente em totalInformadoCaixa
+                                                                const totalInformado = this.state.totalInformadoCaixa[index];
                                                                 const totalInformadoNum = totalInformado ? parseFloat(totalInformado.totalInformado) : null;
                                                                 const diferenca = totalInformadoNum !== null ? (totalCalculado - totalInformadoNum) : '-';
-                                                                return (
 
+                                                                return (
                                                                     <tr key={index}>
                                                                         <td>{formaPagamento.descricao || '-'}</td>
-                                                                        <td>{totalCalculado || '-'}</td>
-                                                                        <td>{totalInformadoNum !== null ? totalInformadoNum.toFixed(2) : '-'}</td>
-                                                                        <td>{totalInformadoNum !== null ? diferenca.toFixed(2) : '-'}</td> {/* Formata a diferença com duas casas decimais */}
+                                                                        <td>{totalCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '-'}</td>
+                                                                        <td>{totalInformadoNum !== null ? totalInformadoNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
+                                                                        <td>{totalInformadoNum !== null ? diferenca.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
                                                                     </tr>
                                                                 );
                                                             })}
                                                             <tr>
                                                                 <td><strong>Total</strong></td>
-                                                                <td><strong>{CalculoTotalRegistrado.toFixed(2)}</strong></td>
-                                                                <td><strong>{CalculoTotalInformado.toFixed(2)}</strong></td>
-                                                                <td><strong>{diferencaTotal.toFixed(2)}</strong></td>
+                                                                <td><strong>{parseFloat(CalculoTotalRegistrado).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
+                                                                <td><strong>{parseFloat(CalculoTotalInformado).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
+                                                                <td><strong>{parseFloat(diferencaTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
                                                             </tr>
-
                                                         </tbody>
                                                     </Table>
                                                 </Container>
