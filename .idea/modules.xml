@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/bling-project.iml" filepath="$PROJECT_DIR$/.idea/bling-project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/embedded-power-bi.iml" filepath="$PROJECT_DIR$/.idea/embedded-power-bi.iml" />
     </modules>
   </component>
 </project>
