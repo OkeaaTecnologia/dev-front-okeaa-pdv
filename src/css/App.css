@@ -4,6 +4,10 @@ html {
   padding: 60;
   height: 100%;
 }
+body {
+  padding-top: 70px;
+  zoom: 0.8;
+}
 
 body {
   background: linear-gradient(to bottom, #000000, #555758);
